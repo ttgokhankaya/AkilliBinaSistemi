@@ -1,5 +1,3 @@
-﻿using Accord.MachineLearning.DecisionTrees;
-using Accord.MachineLearning.DecisionTrees.Learning;
 using AdleGraph.Interfaces;
 using SimulationObjects;
 using System;
@@ -8,14 +6,12 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.Linq;
 using System.Runtime.CompilerServices;
+using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
 
 namespace GUI_Simulation.AnomalyExploration
 {
-    /// <summary>
-    /// Interaction logic for graphSelectionControl.xaml
-    /// </summary>
     public partial class graphSelectionControl : UserControl, INotifyPropertyChanged
     {
         #region Ctor
@@ -29,11 +25,9 @@ namespace GUI_Simulation.AnomalyExploration
             IsMainGraph = false;
             GraphListRenewed();
         }
-
         #endregion Ctor
 
         #region Field
-
         private List<IGraph> _graphList;
         private IGraph _selectedGraph;
         private int _deviceCount;
@@ -44,29 +38,17 @@ namespace GUI_Simulation.AnomalyExploration
         private int _inputWindowLength = 10;
         private List<string> _actionLog = new List<string>();
         private bool isMainGraph;
-
         #endregion Field
 
         #region Properties
-
         public Guid ID { get; set; }
         public int Order
         {
-            get
-            {
-                return _order;
-            }
-
-            set
-            {
-                _order = value;
-                propertyChanged();
-            }
+            get { return _order; }
+            set { _order = value; propertyChanged(); }
         }
 
         public string GraphName { get { return _selectedGraph != null ? _selectedGraph.Name : ""; } }
-
-
         #endregion Properties
 
         #region Algorithm Properties
@@ -77,15 +59,8 @@ namespace GUI_Simulation.AnomalyExploration
         public double[][] proximityMatrix { get; set; }
         public int ScenarioCount
         {
-            get
-            {
-                return _scenarioCount;
-            }
-
-            set
-            {
-                _scenarioCount = value;
-            }
+            get { return _scenarioCount; }
+            set { _scenarioCount = value; }
         }
         public List<DeviceBase> Devices { get; set; } = new List<DeviceBase>();
         public List<IGraph> GraphList
@@ -94,81 +69,43 @@ namespace GUI_Simulation.AnomalyExploration
             {
                 if (_graphList == null)
                     _graphList = new List<IGraph>();
-
                 return _graphList;
             }
-
             private set
             {
                 _graphList = value;
-
                 GraphListRenewed();
             }
         }
         public int DeviceCount
         {
-            get
-            {
-                return _deviceCount;
-            }
-
-            set
-            {
-                _deviceCount = value;
-                propertyChanged();
-            }
+            get { return _deviceCount; }
+            set { _deviceCount = value; propertyChanged(); }
         }
-        public List<DecisionTree> randomForest { get; set; } = new List<DecisionTree>();
         public int CountOfDecisionTreesInForest
         {
-            get
-            {
-                return _countOfDecisionTreesInForest;
-            }
-
-            set
-            {
-                _countOfDecisionTreesInForest = value;
-                propertyChanged();
-            }
+            get { return _countOfDecisionTreesInForest; }
+            set { _countOfDecisionTreesInForest = value; propertyChanged(); }
         }
         public int InputWindowLength
         {
-            get
-            {
-                return _inputWindowLength;
-            }
-
-            set
-            {
-                _inputWindowLength = value;
-                propertyChanged();
-            }
+            get { return _inputWindowLength; }
+            set { _inputWindowLength = value; propertyChanged(); }
         }
-
         public bool IsMainGraph
         {
-            get
-            {
-                return isMainGraph;
-            }
-
+            get { return isMainGraph; }
             set
             {
-                if (IsMainGraph == value)
-                    return;
-
+                if (IsMainGraph == value) return;
                 isMainGraph = value;
                 propertyChanged();
-
                 onMainConfigChanged?.Invoke(this, new RoutedEventArgs());
             }
         }
-
-        #endregion Algorithm Properties 
+        #endregion Algorithm Properties
 
         #region Events
-
         public delegate void closeControlHadler(object sender, RoutedEventArgs e);
         public event closeControlHadler OnClose;
         public delegate void showContentHadler(object sender, ShowContentEventArgs e);
@@ -197,7 +134,6 @@ namespace GUI_Simulation.AnomalyExploration
         {
             MainWindowForGraph graphWindow = new MainWindowForGraph();
             graphWindow.ShowDialog();
-
             GraphList = graphWindow.GraphList;
         }
 
@@ -208,19 +144,14 @@ namespace GUI_Simulation.AnomalyExploration
                 MessageBox.Show("Lütfen Çizelge Seçiniz.");
                 return;
             }
-
             if (((ListBoxItem)cmbGraphs.SelectedItem).Tag == null)
             {
                 MessageBox.Show("Lütfen Çizelge Seçiniz.");
                 return;
             }
-
             _selectedGraph = (IGraph)(((ListBoxItem)cmbGraphs.SelectedItem).Tag);
-
             LoadDevicesAndSensors();
-
             LoadNodes();
-
             AddToActionLogs($"{_selectedGraph.Name} seçildi.");
         }
 
@@ -248,30 +179,18 @@ namespace GUI_Simulation.AnomalyExploration
         {
             OnShowContentMethod(contentToShow: string.IsNullOrEmpty(_randomForestDetails) ? "Gösterecek eleman yok." : _randomForestDetails);
         }
-
         #endregion Events
 
         #region Public Methods
-
-        public bool Run(int scenarioCount = 20, int InputWindowLength = 10, int CountOfDecisionTreesInForest = 5, List<InputWindow> S1 = null, List<DecisionTree> randomForest = null)
+        public bool Run(int scenarioCount = 20, int InputWindowLength = 10, int CountOfDecisionTreesInForest = 5, List<InputWindow> S1 = null)
         {
-            if (cmbFirstNode.SelectedItem == null)
-            {
-                return false;
-            }
-            if (cmbLastNode.SelectedItem == null)
-            {
-                return false;
-            }
+            if (cmbFirstNode.SelectedItem == null) return false;
+            if (cmbLastNode.SelectedItem == null) return false;
 
             s1 = null;
-            this.randomForest = null;
 
             if (S1 != null)
                 s1 = S1;
-
-            if (randomForest != null)
-                this.randomForest = randomForest;
 
             _scenarioCount = scenarioCount;
             _inputWindowLength = InputWindowLength;
@@ -279,7 +198,7 @@ namespace GUI_Simulation.AnomalyExploration
 
             if (_selectedGraph == null || _selectedGraph?.NodeList?.Count <= 0)
             {
-                AddToActionLogs($"Lütfen geçerli bir çizelge seçiniz.");
+                AddToActionLogs("Lütfen geçerli bir çizelge seçiniz.");
                 return false;
             }
 
@@ -291,8 +210,7 @@ namespace GUI_Simulation.AnomalyExploration
             if (!convertSequenceToScenarios(sequences)) return false;
             if (!createS0()) return false;
             if (!createS1()) return false;
-            if (!createRandomForest()) return false;
-            if (!cerateProximityMatrix()) return false;
+            if (!createRandomForestAndProximity()) return false;
 
             AddToActionLogs("Koşum tamamlandı.");
             return true;
@@ -300,18 +218,14 @@ namespace GUI_Simulation.AnomalyExploration
 
         private void AddToActionLogs(string message = "")
         {
-            if (string.IsNullOrEmpty(message))
-                return;
-
+            if (string.IsNullOrEmpty(message)) return;
             string messsage = $"{DateTime.Now}:\t{Order}\t{message} - id:({ID})";
             _actionLog.Add(messsage);
             OnMessageAdding?.Invoke(this, new LogAddedEventArgs() { Message = messsage });
         }
-
         #endregion Public Methods
 
         #region Private Methods
-
         private void OnShowContentMethod(List<InputWindow> data = null, IList list = null, string contentToShow = "")
         {
             showContentEvent?.Invoke(this, new ShowContentEventArgs()
@@ -333,16 +247,13 @@ namespace GUI_Simulation.AnomalyExploration
             scenarios = new List<Scenario>();
             for (int i = 0; i < ScenarioCount; i++)
             {
-                Scenario newScenario = new Scenario()
-                { name = $"{i + 1}. Senaryo" };
-
+                Scenario newScenario = new Scenario() { name = $"{i + 1}. Senaryo" };
                 for (int j = 0; j < sequences[i].Count; j++)
                 {
                     var foundSensor = sensors.Where(x => x.Name == ((DeviceBase)sequences[i][j].Tag).Name).FirstOrDefault();
                     if (foundSensor != null)
                         newScenario.sensors.Add(foundSensor);
                 }
-
                 scenarios.Add(newScenario);
             }
             return true;
@@ -351,18 +262,14 @@ namespace GUI_Simulation.AnomalyExploration
         private void GraphListRenewed()
         {
             cmbGraphs.Items.Clear();
-
             ListBoxItem firstItem = new ListBoxItem();
             firstItem.Content = GraphList.Count > 0 ? "Lütfen işlem yapmak istediğiniz çizelgeyi seçiniz."
                     : "Lütfen Çizelgeler butonu ile çizelge yükleyiniz.";
             firstItem.Tag = null;
-
             cmbGraphs.Items.Add(firstItem);
             cmbGraphs.SelectedIndex = 0;
 
-            if (GraphList == null)
-                return;
-
+            if (GraphList == null) return;
             foreach (var graph in GraphList)
             {
                 ListBoxItem item = new ListBoxItem();
@@ -374,12 +281,9 @@ namespace GUI_Simulation.AnomalyExploration
 
         private void LoadNodes()
         {
-            if (!checkSelectedGraph())
-                return;
-
+            if (!checkSelectedGraph()) return;
             cmbFirstNode.Items.Clear();
             cmbLastNode.Items.Clear();
-
             foreach (var node in _selectedGraph.NodeList)
             {
                 ListBoxItem item = new ListBoxItem();
@@ -392,28 +296,21 @@ namespace GUI_Simulation.AnomalyExploration
                 item.Content = node.Name;
                 cmbLastNode.Items.Add(item);
             }
-
             cmbFirstNode.SelectedIndex = 0;
             cmbLastNode.SelectedIndex = _selectedGraph.NodeList.Count - 1;
         }
 
         private void LoadDevicesAndSensors()
         {
-            if (!checkSelectedGraph())
-                return;
-
+            if (!checkSelectedGraph()) return;
             Devices = new List<DeviceBase>();
             sensors = new List<Sensor>();
-
             for (int i = 0; i < _selectedGraph.NodeList.Count; i++)
             {
                 var _device = (DeviceBase)_selectedGraph.NodeList[i].Tag;
                 var _foundDevice = Devices.Where(x => x.Name == _device.Name).FirstOrDefault();
-                if (_foundDevice != null)
-                    continue;
-
+                if (_foundDevice != null) continue;
                 Devices.Add(_device);
-
                 sensors.Add(new Sensor()
                 {
                     ID = i + 1,
@@ -422,7 +319,6 @@ namespace GUI_Simulation.AnomalyExploration
                     IP = _device.ip
                 });
             }
-
             DeviceCount = Devices.Count;
         }
 
@@ -430,40 +326,34 @@ namespace GUI_Simulation.AnomalyExploration
         {
             if (_selectedGraph.NodeList == null)
             {
-                MessageBox.Show($"Çizelgesi bulunamadı. Lüffen tekrar deneyiniz.");
+                MessageBox.Show("Çizelgesi bulunamadı. Lüffen tekrar deneyiniz.");
                 return false;
             }
-
             if (_selectedGraph.NodeList.Count <= 0)
             {
                 MessageBox.Show($"{_selectedGraph.Name} çizelgesine eklenmiş düğüm bulunamadı. Lütfen uygun bir çizelge seçiniz.");
                 return false;
             }
-
             if (_selectedGraph.EdgeList.Count <= 0)
             {
                 MessageBox.Show($"{_selectedGraph.Name} çizelgesine eklenmiş kenar bulunamadı. Lütfen uygun bir çizelge seçiniz.");
                 return false;
             }
-
             return true;
         }
-
         #endregion Private Methods
 
         #region Algorithm Methods
-
         private bool createS0()
         {
             if (scenarios == null || scenarios.Count <= 0)
             {
-                AddToActionLogs("Senaryo oluşmamış. Lütfen seçmediyseniz çizelge seçerek başlat tuşuna basın. Seçtiniğiniz çizelgenin uygunluğunu denetleyiniz. ");
+                AddToActionLogs("Senaryo oluşmamış. Lütfen seçmediyseniz çizelge seçerek başlat tuşuna basın.");
                 return false;
             }
 
             InputWindow window = new InputWindow(sensors.Count, _inputWindowLength);
             window.order = 1;
-
             int count = 0;
             int step = 0;
             s0 = new List<InputWindow>();
@@ -479,23 +369,15 @@ namespace GUI_Simulation.AnomalyExploration
                         window.order = lastOrder + 1;
                         step = 0;
                     }
-
                     window.states[sensor.ID - 1][step] = 1.0;
-
                     step++;
                     count++;
                     if (count == scenarios.Count)
-                    {
                         s0.Add(window);
-                    }
                 }
-
             }
-
             foreach (var data in s0)
-            {
                 data.ConvolveWindow();
-            }
 
             AddToActionLogs("S0 oluştu.");
             return true;
@@ -503,145 +385,80 @@ namespace GUI_Simulation.AnomalyExploration
 
         private bool createS1()
         {
-            if (s1 != null)
-                return true;
-
+            if (s1 != null) return true;
             if (s0 == null || s0.Count <= 0)
             {
                 AddToActionLogs("S0 oluşmamış lütfen öncelikle çizelce seçerek başlat tuşuna basınız");
                 return false;
             }
 
-            List<InputWindow> copyOfS0 = new List<InputWindow>();
+            var copyOfS0 = new List<InputWindow>(s0);
             s1 = new List<InputWindow>();
-            foreach (var item in s0)
-            {
-                copyOfS0.Add(item);
-            }
-
             while (copyOfS0.Count > 0)
             {
-                int selected = Accord.Math.Vector.Random(1, 0, copyOfS0.Count)[0];
+                int selected = Random.Shared.Next(0, copyOfS0.Count);
                 s1.Add(copyOfS0[selected]);
                 copyOfS0.RemoveAt(selected);
             }
-
             foreach (var data in s1)
-            {
                 data.ConvolveWindow();
-            }
 
             AddToActionLogs("S1 oluştu");
             return true;
         }
 
-        private bool createRandomForest()
+        private bool createRandomForestAndProximity()
         {
-            if (this.randomForest != null)
-                return true;
-
             try
             {
-                randomForest = new List<DecisionTree>();
-                int lenghtOfDecisionTreeInput = 2;
+                var s0Flat = FlattenWindows(s0);
+                var s1Flat = FlattenWindows(s1);
+                var allFlat = s0Flat.Concat(s1Flat).ToArray();
+
+                RandomForestResponse result = Task.Run(() =>
+                    MlServiceClient.ComputeRandomForestAsync(s0Flat, s1Flat, allFlat, _countOfDecisionTreesInForest)
+                ).GetAwaiter().GetResult();
+
+                proximityMatrix = result.proximity_matrix;
+
                 _randomForestDetails = $"{Order} ({ID})\n\t1 for S0, 0 for S1\n\t-----------------------\n\t";
-                //Debug.WriteLine($"1 for S0, 0 for S1");
-                for (int j = 0; j < CountOfDecisionTreesInForest; j++)
-                {
-                    double[][] inputs = new double[lenghtOfDecisionTreeInput * sensors.Count][];
-                    int[] output = new int[lenghtOfDecisionTreeInput * sensors.Count];
-                    DecisionVariable[] variables = new DecisionVariable[InputWindowLength];
+                if (result.tree_texts != null)
+                    for (int i = 0; i < result.tree_texts.Length; i++)
+                        _randomForestDetails += $"{i + 1}. tree in forest\n{result.tree_texts[i]}\n";
 
-                    for (int i = 0; i < InputWindowLength; i++)
-                    {
-                        variables[i] = new DecisionVariable($"{i}", new Accord.DoubleRange(0.0, 1.0));
-                    }
-
-                    for (int i = 0; i < s0[j].convolvedStates.Length; i++)
-                    {
-                        inputs[i] = s0[j].convolvedStates[i];
-                        output[i] = 1;
-                    }
-
-                    for (int i = 0; i < s1[j].convolvedStates.Length; i++)
-                    {
-                        inputs[i + s0[j].convolvedStates.Length] = s1[j].convolvedStates[i];
-                        output[i + s0[j].convolvedStates.Length] = 0;
-                    }
-
-                    var c45 = new C45Learning(variables);
-                    DecisionTree tree = c45.Learn(inputs, output);
-                    _randomForestDetails += $"{j + 1}. tree in forest\n";
-                    _randomForestDetails += tree.Root.PrintPretty2(" ", true);
-                    randomForest.Add(tree);
-                }
-
-                AddToActionLogs("Random forest oluştu");
+                AddToActionLogs("Random forest ve yakınlık matrisi oluştu.");
                 return true;
             }
             catch (Exception ex)
             {
-                AddToActionLogs($"Random forest oluşumunda hata: {ex.Message}");
+                AddToActionLogs($"ML servisi hatası: {ex.Message}");
                 return false;
             }
         }
 
-        private bool cerateProximityMatrix()
+        private double[][] FlattenWindows(List<InputWindow> windows)
         {
-            if (s0 == null || s0?.Count <= 0)
-            {
-                AddToActionLogs("S0 verisi oluşmamış.\nLütfen çizelge seçip başka tuşuna basınız.");
-                return false;
-            }
-
-            proximityMatrix = new double[s0.Count][];
-            int counter = 0;
-            for (int f = 0; f < randomForest.Count; f++)
-            {
-                for (int i = 0; i < s0.Count; i++)
-                {
-                    for (int t = 0; t < s1.Count; t++)
-                    {
-                        for (int j = 0; j < s0[i].convolvedStates.Length; j++)
-                        {
-                            var resultOfS0 = randomForest[f].Decide(s0[i].convolvedStates[j]);
-                            var resultOfS1 = randomForest[f].Decide(s1[t].convolvedStates[j]);
-                            if (resultOfS0 == resultOfS1)
-                            {
-                                if (proximityMatrix[i] == null)
-                                {
-                                    proximityMatrix[i] = new double[s1.Count];
-                                }
-
-                                proximityMatrix[i][t] = proximityMatrix[i][t] + 1;
-                            }
-                            counter++;
-                        }
-                    }
-                }
-            }
-
-
-            AddToActionLogs("Yakınlık matrisi oluştu");
-            return true;
+            var rows = new List<double[]>();
+            foreach (var w in windows)
+                foreach (var row in w.convolvedStates)
+                    rows.Add(row);
+            return rows.ToArray();
         }
-
 
         private bool showInGraph()
         {
-            if (proximityMatrix == null || proximityMatrix.Count() <= 0)
+            if (proximityMatrix == null || proximityMatrix.Length <= 0)
             {
                 AddToActionLogs("Yakınlık matrisi hesaplanmamış.\nLütfen cizelge seçip başka tuşuna basınız.");
                 return false;
             }
-
-            GraficView form = new GraficView(new List<ObservationSet>() { new ObservationSet() { Observations = proximityMatrix, Name = _selectedGraph.Name } });
+            GraficView form = new GraficView(new List<ObservationSet>()
+            {
+                new ObservationSet() { Observations = proximityMatrix, Name = _selectedGraph.Name }
+            });
             form.ShowDialog();
-
             return true;
         }
-
-
         #endregion
 
         #region PropertyChagedInterfaceImplementaion
@@ -651,7 +468,6 @@ namespace GUI_Simulation.AnomalyExploration
         {
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
         }
-
         #endregion PropertyChagedInterfaceImplementaion
     }
 }

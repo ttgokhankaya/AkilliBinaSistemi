@@ -1,10 +1,10 @@
-using Accord.MachineLearning.Clustering;
-using Accord.Math.Random;
 using OxyPlot;
 using OxyPlot.Series;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Runtime.CompilerServices;
+using System.Threading.Tasks;
 using System.Windows;
 
 namespace GUI_Simulation.AnomalyExploration
@@ -48,19 +48,11 @@ namespace GUI_Simulation.AnomalyExploration
 
         private void generateGraficView()
         {
-            Generator.Seed = 0;
-
             if (!double.TryParse(txtPerplexityValue.Text, out _perplexityValue))
             {
                 MessageBox.Show("Perplexity değeri ondalık bir sayı olmalıdır.");
                 return;
             }
-
-            TSNE tSNE = new TSNE
-            {
-                NumberOfOutputs = 2,
-                Perplexity = _perplexityValue
-            };
 
             _plotModel = new PlotModel { Title = "" };
             _plotModel.Axes.Add(new OxyPlot.Axes.LinearAxis
@@ -88,7 +80,19 @@ namespace GUI_Simulation.AnomalyExploration
 
             foreach (var observation in observations)
             {
-                double[][] output = tSNE.Transform(observation.Observations);
+                double[][] output;
+                try
+                {
+                    output = Task.Run(() =>
+                        MlServiceClient.ComputeTsneAsync(observation.Observations, _perplexityValue)
+                    ).GetAwaiter().GetResult();
+                }
+                catch (Exception ex)
+                {
+                    MessageBox.Show($"ML servisi hatası: {ex.Message}\nDocker'ın çalıştığından emin olun.");
+                    return;
+                }
+
                 var series = new ScatterSeries
                 {
                     Title = observation.Name,

@@ -1,6 +1,7 @@
 <UserControl x:Class="AdleGraph.GraphCanvas"
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
-    <Canvas x:Name="mainCanvas" Background="White"
-            MouseLeftButtonDown="Canvas_MouseLeftButtonDown" />
+    <Canvas Name="mainCanvas"
+            Background="White"
+            MouseLeftButtonDown="Canvas_MouseLeftButtonDown"/>
 </UserControl>

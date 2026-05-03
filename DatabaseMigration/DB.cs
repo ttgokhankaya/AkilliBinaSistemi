@@ -1,20 +1,17 @@
-﻿using DataAccess;
+using DataAccess;
 using DomainObjects;
-using System;
-using System.Collections.Generic;
+using Npgsql;
 using System.Data.Entity;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace DatabaseMigration
 {
-    [System.Data.Entity.DbConfigurationType(typeof(NpgsqlDbConfiguration))]
+    [DbConfigurationType(typeof(NpgsqlDbConfiguration))]
     public class DB : DbContext, IDataContext
     {
-        public DB()
+        private const string ConnStr = "Host=localhost;Port=5432;Database=adle_sim;Username=adle_user;Password=Password1;";
+
+        public DB() : base(new NpgsqlConnection(ConnStr), contextOwnsConnection: true)
         {
-            this.Database.Connection.ConnectionString = @"Host=localhost;Port=5432;Database=adle_sim;Username=adle_user;Password=Password1;";
         }
 
         public DbSet<Area> Areas { get; set; }
@@ -22,9 +19,6 @@ namespace DatabaseMigration
         public DbSet<Item> Items { get; set; }
         public DbSet<Memory> Memoryies { get; set; }
 
-        public int SaveAllChanges()
-        {
-            return base.SaveChanges();
-        }
+        public int SaveAllChanges() => base.SaveChanges();
     }
 }

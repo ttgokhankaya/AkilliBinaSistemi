@@ -214,7 +214,7 @@ namespace GUI_Simulation.AnomalyExploration
                 if (control.ID == mainGraph.ID)
                     continue;
 
-                control.Run(ScenarioCount, InputWindowLength, CountOfDecisionTreesInForest, mainGraph.s1, mainGraph.randomForest);
+                control.Run(ScenarioCount, InputWindowLength, CountOfDecisionTreesInForest, mainGraph.s1);
             }
         }
 

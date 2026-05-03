@@ -1,4 +1,3 @@
-version: '3.8'
 services:
   postgres:
     image: postgres:15
@@ -10,6 +9,12 @@ services:
       - "5432:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
+    restart: unless-stopped
+
+  ml_service:
+    build: ./ml_service
+    ports:
+      - "8000:8000"
     restart: unless-stopped
 
 volumes:

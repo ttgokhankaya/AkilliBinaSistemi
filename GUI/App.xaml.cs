@@ -1,23 +1,43 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Configuration;
-using System.Data;
-using System.Linq;
-using System.Threading.Tasks;
+using System;
+using System.Data.Entity;
+using System.Data.Entity.Migrations;
 using System.Windows;
 using System.Windows.Threading;
 
 namespace GUI
 {
-    /// <summary>
-    /// Interaction logic for App.xaml
-    /// </summary>
     public partial class App : Application
     {
-        void App_DispatcherUnhandledException(object sender, DispatcherUnhandledExceptionEventArgs e)
+        static App()
         {
+            DbConfiguration.SetConfiguration(new DatabaseMigration.NpgsqlDbConfiguration());
+        }
 
-            // Prevent default unhandled exception processing
+        public App()
+        {
+            DispatcherUnhandledException += App_DispatcherUnhandledException;
+            RunMigrations();
+        }
+
+        private static void RunMigrations()
+        {
+            try
+            {
+                var migrator = new DbMigrator(new DatabaseMigration.Migrations.Configuration());
+                migrator.Update();
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(
+                    $"Veritabanı migration hatası:\n{ex.Message}\n\nDocker PostgreSQL çalışıyor mu kontrol edin.",
+                    "Migration Hatası",
+                    MessageBoxButton.OK,
+                    MessageBoxImage.Warning);
+            }
+        }
+
+        private void App_DispatcherUnhandledException(object sender, DispatcherUnhandledExceptionEventArgs e)
+        {
             e.Handled = true;
         }
     }
