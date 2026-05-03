@@ -1,5 +1,5 @@
-﻿using AdleGraph.Interfaces;
-using AdleGraphWithVGRAPH;
+﻿using AdleGraph;
+using AdleGraph.Interfaces;
 using GUI_Simulation.AnomalyExploration;
 using GUI_Simulation.SequencePattern.AnalysisRuleDefinitions;
 using GUI_Simulation.SequencePattern.Scoring;
@@ -37,7 +37,7 @@ namespace GUI_Simulation.SequencePattern
         }
 
 
-        private void Board_coordinates(object sender, AdleGraphWithVGRAPH.CoordinatesEventArgs e)
+        private void Board_coordinates(object sender, CoordinatesEventArgs e)
         {
             _coordinates = e.Coordinates;
         }

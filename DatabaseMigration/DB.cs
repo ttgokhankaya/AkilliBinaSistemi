@@ -9,6 +9,7 @@ using System.Threading.Tasks;
 
 namespace DatabaseMigration
 {
+    [System.Data.Entity.DbConfigurationType(typeof(NpgsqlDbConfiguration))]
     public class DB : DbContext, IDataContext
     {
         public DB()

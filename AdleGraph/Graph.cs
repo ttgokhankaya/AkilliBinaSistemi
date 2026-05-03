@@ -220,7 +220,7 @@ namespace AdleGraph
         {
             string[] array = matrixString.Replace("\r\n", "&").TrimEnd('&').Split('&');
             string[] nodes = array[0].Substring(1, array[0].Length - 1).Replace("\t", "&").TrimEnd('&').Split('&');
-            IGraph graph = IoC.Container.Resolve<IGraph>();
+            IGraph graph = Container.Resolve<IGraph>();
             graph.Name = name;
 
             foreach (var node in nodes)

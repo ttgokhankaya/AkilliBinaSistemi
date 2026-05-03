@@ -1,4 +1,4 @@
-﻿<Window xmlns:AdleGraphWithVGRAPH="clr-namespace:AdleGraphWithVGRAPH;assembly=AdleGraphWithVGRAPH"  xmlns:WPFWaterMarkTextBox="clr-namespace:WPFWaterMarkTextBox;assembly=WPFWaterMarkTextBox"  x:Class="GUI_Simulation.SequencePattern.MainWindowSequentialPattern"
+﻿<Window xmlns:adlegraph="clr-namespace:AdleGraph;assembly=AdleGraph" x:Class="GUI_Simulation.SequencePattern.MainWindowSequentialPattern"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
@@ -160,7 +160,7 @@
             </TabItem>
             <TabItem Header=" Çizge ">
                 <Grid Background="#FFE5E5E5">
-                    <AdleGraphWithVGRAPH:graphWindow Margin="2" Name="board" />
+                    <adlegraph:GraphCanvas Margin="2" Name="board" />
                 </Grid>
             </TabItem>
             <TabItem Header=" Tahmin ">

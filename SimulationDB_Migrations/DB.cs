@@ -4,6 +4,7 @@ using System.Data.Entity;
 
 namespace SimulationDB_Migrations
 {
+    [System.Data.Entity.DbConfigurationType(typeof(NpgsqlDbConfiguration))]
     public class DB : DbContext, IDataContext
 
     {

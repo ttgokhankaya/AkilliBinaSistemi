@@ -1,4 +1,4 @@
-﻿<UserControl xmlns:WPFWaterMarkTextBox="clr-namespace:WPFWaterMarkTextBox;assembly=WPFWaterMarkTextBox"  x:Class="GUI_Simulation.SequencePattern.PersonUserControl"
+﻿<UserControl x:Class="GUI_Simulation.SequencePattern.PersonUserControl"
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
