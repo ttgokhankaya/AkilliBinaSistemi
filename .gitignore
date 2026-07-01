@@ -38,4 +38,4 @@ TestResults/
 ## ReSharper
 _ReSharper*/
 *.DotSettings.user
-.claude/
+.claude/settings.local.json

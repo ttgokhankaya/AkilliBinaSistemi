@@ -30,7 +30,7 @@ dotnet test
 # Run a single test project
 dotnet test GUI.Test/GUI.Test.csproj
 dotnet test FakeDataProvider.Test/FakeDataProvider.Test.csproj
-dotnet test SimulationObjects.Test/SimulationObjects.Test.csproj
+dotnet test FakeDevices.Test/SimulationObjects.Test.csproj  # note: project name differs from folder name
 
 # ML service (local, without Docker)
 cd ml_service
