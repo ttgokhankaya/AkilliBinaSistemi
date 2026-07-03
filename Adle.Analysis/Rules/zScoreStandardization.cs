@@ -4,10 +4,10 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace GUI_Simulation.SequencePattern.AnalysisRuleDefinitions
+namespace Adle.Analysis.Rules
 {
     public class zScoreStandardization
     {
-        //public static List<AnalizeResult> Calculate
+        //public static List<AnalyzeResult> Calculate
     }
 }

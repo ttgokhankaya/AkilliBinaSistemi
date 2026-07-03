@@ -2,7 +2,7 @@
 using SequentialPattern;
 using System.Collections.Generic;
 
-namespace GUI_Simulation.SequencePattern
+namespace Adle.Analysis
 {
     public interface IAnalysisRule
     {
@@ -10,11 +10,11 @@ namespace GUI_Simulation.SequencePattern
 
         void setParams(params object[] param);
 
-        List<SequenceBarDTO> Analize(Sequence<INode> param, List<SequenceBarDTO> data);
+        List<SequenceBarDTO> Analyze(Sequence<INode> param, List<SequenceBarDTO> data);
 
-        List<AnalizeResult> probabilityDistributionOfNodesInTheNextStep { get; }
+        List<AnalyzeResult> probabilityDistributionOfNodesInTheNextStep { get; }
 
-        List<AnalizeResult> lastProbabilityDistributionOfNodes { get; }
+        List<AnalyzeResult> lastProbabilityDistributionOfNodes { get; }
 
         List<SequenceBarDTO> currentSequenceAnalysisResultOfSequenceBars { get; }
 

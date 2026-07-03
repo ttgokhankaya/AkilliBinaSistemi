@@ -6,7 +6,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace GUI_Simulation.SequencePattern
+namespace Adle.Analysis
 {
     public class SequenceAnalyzer
     {
@@ -14,7 +14,7 @@ namespace GUI_Simulation.SequencePattern
         {
             Rules = new List<IAnalysisRule>();
             currentSequenceAnalysisResult = new List<SequenceBarDTO>();
-            probabilityDistributionOfNodesInTheNextStep = new List<AnalizeResult>();
+            probabilityDistributionOfNodesInTheNextStep = new List<AnalyzeResult>();
         }
 
         public List<IAnalysisRule> Rules { get; set; }
@@ -23,8 +23,8 @@ namespace GUI_Simulation.SequencePattern
 
         public List<SequenceBarDTO> currentSequenceAnalysisResult { get; private set; }
 
-        public List<AnalizeResult> probabilityDistributionOfNodesInTheNextStep { get; private set; }
-        public List<AnalizeResult> lastProbabilityDistributionOfNodes { get; private set; }
+        public List<AnalyzeResult> probabilityDistributionOfNodesInTheNextStep { get; private set; }
+        public List<AnalyzeResult> lastProbabilityDistributionOfNodes { get; private set; }
 
         public string ResultsFromWhichRule { get; private set; }
 
@@ -41,7 +41,7 @@ namespace GUI_Simulation.SequencePattern
             {
                 ResultsFromWhichRule = rule.name;
 
-                currentSequenceAnalysisResult = rule.Analize(param, Data);
+                currentSequenceAnalysisResult = rule.Analyze(param, Data);
                 probabilityDistributionOfNodesInTheNextStep = rule.probabilityDistributionOfNodesInTheNextStep;
                 lastProbabilityDistributionOfNodes = rule.lastProbabilityDistributionOfNodes;
 

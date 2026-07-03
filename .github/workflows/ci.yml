@@ -1,0 +1,48 @@
+name: CI
+
+on:
+  push:
+    branches: [master]
+  pull_request:
+    branches: [master]
+
+jobs:
+  dotnet:
+    name: Build & Test (.NET 8)
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup .NET 8
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 8.0.x
+
+      - name: Restore
+        run: dotnet restore AkilliBinaSistemi.sln
+
+      - name: Build
+        run: dotnet build AkilliBinaSistemi.sln --no-restore --configuration Release
+
+      - name: Test
+        run: dotnet test AkilliBinaSistemi.sln --no-build --configuration Release --verbosity normal
+
+  ml-service:
+    name: ML Service (Python)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install dependencies
+        run: pip install -r ml_service/requirements.txt
+
+      - name: Import smoke test
+        run: python -c "import sys; sys.path.insert(0, 'ml_service'); import main; print('FastAPI app loads:', main.app.title)"
+
+      - name: Docker build
+        run: docker build -t adle-ml-service ./ml_service

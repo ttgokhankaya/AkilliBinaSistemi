@@ -1,3 +1,7 @@
+using Adle.Analysis;
+using Scenario = Adle.Analysis.Scenario;
+using Sensor = Adle.Analysis.Sensor;
+using Adle.Analysis.Rules;
 using AdleGraph.Interfaces;
 using SimulationObjects;
 using System;

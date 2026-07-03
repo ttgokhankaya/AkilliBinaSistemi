@@ -2,7 +2,7 @@
 using SequentialPattern;
 using System.Collections.Generic;
 
-namespace GUI_Simulation.SequencePattern.AnalysisRuleDefinitions
+namespace Adle.Analysis.Rules
 {
     public class SimilarityRule : IAnalysisRule
     {
@@ -33,23 +33,23 @@ namespace GUI_Simulation.SequencePattern.AnalysisRuleDefinitions
             }
         }
 
-        public List<AnalizeResult> probabilityDistributionOfNodesInTheNextStep { get; private set; }
+        public List<AnalyzeResult> probabilityDistributionOfNodesInTheNextStep { get; private set; }
 
         public List<SequenceBarDTO> currentSequenceAnalysisResultOfSequenceBars { get; private set; }
 
-        public List<AnalizeResult> lastProbabilityDistributionOfNodes { get; private set; }
+        public List<AnalyzeResult> lastProbabilityDistributionOfNodes { get; private set; }
 
         #endregion Properties
 
         #region Public Methods
-        public List<SequenceBarDTO> Analize(Sequence<INode> sequence, List<SequenceBarDTO> data)
+        public List<SequenceBarDTO> Analyze(Sequence<INode> sequence, List<SequenceBarDTO> data)
         {
             if (order <= 0)
                 return new List<SequenceBarDTO>();
 
             currentSequenceAnalysisResultOfSequenceBars = new List<SequenceBarDTO>();
             lastProbabilityDistributionOfNodes = probabilityDistributionOfNodesInTheNextStep;
-            probabilityDistributionOfNodesInTheNextStep = new List<AnalizeResult>();
+            probabilityDistributionOfNodesInTheNextStep = new List<AnalyzeResult>();
 
             foreach (var item in data)
             {
@@ -68,7 +68,7 @@ namespace GUI_Simulation.SequencePattern.AnalysisRuleDefinitions
                 var foundNode = probabilityDistributionOfNodesInTheNextStep.Find(x => x.value.Name == node.Name);
 
                 if (foundNode == null)
-                    probabilityDistributionOfNodesInTheNextStep.Add(new AnalizeResult() { value = node, countOfNode = 1, probability = 0.0 });
+                    probabilityDistributionOfNodesInTheNextStep.Add(new AnalyzeResult() { value = node, countOfNode = 1, probability = 0.0 });
                 else
                     foundNode.countOfNode = foundNode.countOfNode + 1;
             }

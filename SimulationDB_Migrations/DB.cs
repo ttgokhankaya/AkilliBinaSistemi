@@ -8,7 +8,10 @@ namespace SimulationDB_Migrations
     [DbConfigurationType(typeof(DatabaseMigration.NpgsqlDbConfiguration))]
     public class DB : DbContext, IDataContext
     {
-        private const string ConnStr = "Host=localhost;Port=5432;Database=adle_sim;Username=adle_user;Password=Password1;";
+        private const string DefaultConnStr = "Host=localhost;Port=5432;Database=adle_sim;Username=adle_user;Password=Password1;";
+
+        internal static string ConnStr =>
+            System.Environment.GetEnvironmentVariable("ADLE_DB_CONNECTION") ?? DefaultConnStr;
 
         public DB() : base(new NpgsqlConnection(ConnStr), contextOwnsConnection: true)
         {

@@ -10,7 +10,7 @@ namespace SharedObject
     {
         List<AdleMemoryObject> Memories { get; set; }
         void AddMemory(AdleMemoryObject memory);
-        bool AnalizeMemory(AdleMemoryObject memory);
+        bool AnalyzeMemory(AdleMemoryObject memory);
         List<AdleMemoryObject> GetAllMemories();
     }
 }

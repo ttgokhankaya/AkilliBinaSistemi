@@ -4,7 +4,7 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:GUI_Simulation.GraphSimulation"
-        xmlns:adlegraph="clr-namespace:AdleGraph;assembly=AdleGraph" x:Class="GUI_Simulation.GraphSimulation.graphShow"
+        xmlns:adlegraph="clr-namespace:AdleGraph.Wpf;assembly=AdleGraph.Wpf" x:Class="GUI_Simulation.GraphSimulation.graphShow"
         mc:Ignorable="d"
         Title="" Height="400" Width="600"  Background="WhiteSmoke" WindowStartupLocation="CenterScreen" WindowState="Maximized">
     <Grid>

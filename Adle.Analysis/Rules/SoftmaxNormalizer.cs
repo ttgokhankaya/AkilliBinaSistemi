@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace GUI_Simulation.SequencePattern.AnalysisRuleDefinitions
+namespace Adle.Analysis.Rules
 {
     public class SoftmaxNormalizer : ICalculator
     {
@@ -48,10 +48,10 @@ namespace GUI_Simulation.SequencePattern.AnalysisRuleDefinitions
             return output;
         }
 
-        public static List<AnalizeResult> Calculate(List<AnalizeResult> data)
+        public static List<AnalyzeResult> Calculate(List<AnalyzeResult> data)
         {
             double total = 0.0;
-            List<AnalizeResult> output = new List<AnalizeResult>();
+            List<AnalyzeResult> output = new List<AnalyzeResult>();
             var normalizedData = MinMaxNormalizer.Calculate(data);
 
             if (normalizedData == null)
@@ -65,7 +65,7 @@ namespace GUI_Simulation.SequencePattern.AnalysisRuleDefinitions
             foreach (var input in normalizedData)
             {
                 double result = Math.Exp(input.normalizedValue) / total;
-                output.Add(new AnalizeResult() { value = input.value, countOfNode = input.countOfNode, probability = result, normalizedValue = input.normalizedValue });
+                output.Add(new AnalyzeResult() { value = input.value, countOfNode = input.countOfNode, probability = result, normalizedValue = input.normalizedValue });
             }
 
             return output;

@@ -37,7 +37,7 @@ namespace MemoryModel
 
         public string Name { get; set; }
 
-        public bool AnalizeMemory(AdleMemoryObject memory)
+        public bool AnalyzeMemory(AdleMemoryObject memory)
         {
             using (var uow = GetContext)
             {

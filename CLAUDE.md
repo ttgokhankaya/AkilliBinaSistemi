@@ -28,6 +28,7 @@ dotnet build AkilliBinaSistemi.sln
 dotnet test
 
 # Run a single test project
+dotnet test Adle.Analysis.Test/Adle.Analysis.Test.csproj    # analysis core (LCS, normalizers)
 dotnet test GUI.Test/GUI.Test.csproj
 dotnet test FakeDataProvider.Test/FakeDataProvider.Test.csproj
 dotnet test FakeDevices.Test/SimulationObjects.Test.csproj  # note: project name differs from folder name
@@ -78,7 +79,7 @@ Rules:
 
 - Never add an entity or FK that crosses the two stacks; cross-boundary references stay as plain ID columns.
 - Migration failures at startup show a MessageBox warning and the app **continues running** — a half-migrated DB can therefore go unnoticed.
-- Connection strings are hardcoded as `const ConnStr` in each stack's `DB.cs` (not in App.config). `DataAccess/UnitOfWorkFactory.cs` also contains a legacy SQL Server connection string — the PostgreSQL path is the live one.
+- Connection strings default to localhost values in each stack's `DB.cs` and can be overridden with the `ADLE_DB_CONNECTION` environment variable. `DataAccess/UnitOfWorkFactory.cs` (legacy SQL Server / MongoDB paths) honors `ADLE_MSSQL_CONNECTION` / `ADLE_MONGO_CONNECTION` — the PostgreSQL path is the live one.
 - Npgsql is wired via `DbConfiguration.SetConfiguration(new DatabaseMigration.NpgsqlDbConfiguration())` in `App`'s static constructor.
 
 First run seeds sample data: area types (LivingRoom, Bedroom, Kitchen…), areas (Ev, Oturma Odası…), devices (Lamba, Termostat, Hareket Sensörü, Akıllı Priz at 192.168.1.x), two residents, and morning/noon/evening/night operation routines.
@@ -96,13 +97,10 @@ A custom IoC container lives in `IoC/Container.cs` (singleton, service-locator p
 
 Key interfaces: `IRepository<T>`, `IUnitOfWork`, `IDataContext`, `ITransaction`. When changing these interfaces, keep both provider implementations compiling.
 
-### AdleGraph
+### Core Libraries (platform-independent, net8.0)
 
-A self-contained directed/undirected graph engine with:
-
-- Weighted nodes/edges, matrix operations, path-finding
-- A WPF `GraphCanvas` component for visualization
-- `Utility.cs` for graph serialization/deserialization
+- **`AdleGraph`** — directed/undirected graph engine: weighted nodes/edges, matrix operations, path-finding, `Sequence<T>` with LCS computation (`namespace SequentialPattern`), `Utility.cs` for serialization. The WPF `GraphCanvas` visualization lives separately in **`AdleGraph.Wpf`** (net8.0-windows).
+- **`Adle.Analysis`** — the thesis's analysis core extracted from the GUI: `SequenceAnalyzer` + `IAnalysisRule` pipeline (`SimilarityRule`, `LCSRule` in `Adle.Analysis.Rules`), `MinMaxNormalizer`, `SoftmaxNormalizer`, `zScoreStandardization`, plus `Scenario`/`Sensor` DTOs. Covered by `Adle.Analysis.Test`. Note: `SimulationObjects.Scenario` (a DB entity in `FakeDevices/`) is a *different* class than `Adle.Analysis.Scenario` — some GUI files use `using` aliases to disambiguate.
 
 ### ML Service
 

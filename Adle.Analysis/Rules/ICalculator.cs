@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace GUI_Simulation.SequencePattern.AnalysisRuleDefinitions
+namespace Adle.Analysis.Rules
 {
     public interface ICalculator
     {

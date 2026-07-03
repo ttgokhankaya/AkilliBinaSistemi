@@ -1,9 +1,8 @@
 ﻿using AdleGraph.Interfaces;
-using GUI_Simulation.AnomalyExploration;
 using SequentialPattern;
 using System;
 
-namespace GUI_Simulation.SequencePattern
+namespace Adle.Analysis
 {
     public class SequenceBarDTO
     {

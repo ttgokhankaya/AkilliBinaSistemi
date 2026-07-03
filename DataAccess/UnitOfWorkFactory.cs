@@ -54,26 +54,26 @@ namespace DataAccess
 
         public static IUnitOfWork CreateContext()
         {
-            //TODO:Config
-
-            string connectionString = "";
+            string connectionString;
             UnitOfWorkFactory unitOfWork = null;
 
             switch (ServerType)
             {
                 case Utilities.ServerTypes.MsSqlServer:
-                    //connectionString = @"Server=172.24.96.1;Database=ADLE_Sim_2;Trusted_Connection=True";
-                    connectionString = @"Server=172.25.208.1;Database=ADLE_Sim_2;User Id=sa;Password=Password1;";
+                    connectionString = Environment.GetEnvironmentVariable("ADLE_MSSQL_CONNECTION")
+                        ?? @"Server=localhost;Database=ADLE_Sim_2;Trusted_Connection=True";
                     unitOfWork = new UnitOfWorkFactory(new EntityFrameworkProvider(connectionString), Utilities.RepoTypes.Standart);
                     break;
                 case Utilities.ServerTypes.MySql:
                     break;
                 case Utilities.ServerTypes.MongoDB:
-                    connectionString = @"mongodb://localhost:27017/";
+                    connectionString = Environment.GetEnvironmentVariable("ADLE_MONGO_CONNECTION")
+                        ?? @"mongodb://localhost:27017/";
                     unitOfWork = new UnitOfWorkFactory(new EntityFrameworkProvider(connectionString), Utilities.RepoTypes.Standart);
                     break;
                 default:
-                    connectionString = @"Server=172.25.208.1;Database=ADLE_Sim_2;User Id=sa;Password=Password1;";
+                    connectionString = Environment.GetEnvironmentVariable("ADLE_MSSQL_CONNECTION")
+                        ?? @"Server=localhost;Database=ADLE_Sim_2;Trusted_Connection=True";
                     unitOfWork = new UnitOfWorkFactory(new EntityFrameworkProvider(connectionString), Utilities.RepoTypes.Standart);
                     break;
             }

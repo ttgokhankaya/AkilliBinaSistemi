@@ -1,4 +1,6 @@
-﻿using AdleGraph.Interfaces;
+﻿using Adle.Analysis;
+using Adle.Analysis.Rules;
+using AdleGraph.Interfaces;
 using GUI_Simulation.AnomalyExploration;
 using GUI_Simulation.GraphSimulation;
 using SequentialPattern;
@@ -83,7 +85,7 @@ namespace GUI_Simulation.LCS
 
         public List<Sensor> sensors { get; set; } = new List<Sensor>();
 
-        public List<AnomalyExploration.Scenario> scenarios { get; set; } = new List<AnomalyExploration.Scenario>();
+        public List<Adle.Analysis.Scenario> scenarios { get; set; } = new List<Adle.Analysis.Scenario>();
 
         public int DeviceCount
         {
@@ -395,10 +397,10 @@ namespace GUI_Simulation.LCS
                 return false;
             }
 
-            scenarios = new List<AnomalyExploration.Scenario>();
+            scenarios = new List<Adle.Analysis.Scenario>();
             for (int i = 0; i < _scenarioCount; i++)
             {
-                AnomalyExploration.Scenario newScenario = new AnomalyExploration.Scenario()
+                Adle.Analysis.Scenario newScenario = new Adle.Analysis.Scenario()
                 { name = $"{i + 1}. Senaryo" };
 
                 for (int j = 0; j < sequences[i].Count; j++)

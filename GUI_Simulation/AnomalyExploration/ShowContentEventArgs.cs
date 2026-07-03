@@ -1,4 +1,6 @@
-﻿using AdleGraph.Interfaces;
+﻿using Adle.Analysis;
+using Adle.Analysis.Rules;
+using AdleGraph.Interfaces;
 using SequentialPattern;
 using System;
 using System.Collections;

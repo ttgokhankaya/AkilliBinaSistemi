@@ -14,7 +14,9 @@
     <PackageReference Include="OxyPlot.Wpf" Version="2.1.2" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\Adle.Analysis\Adle.Analysis.csproj" />
     <ProjectReference Include="..\AdleGraph\AdleGraph.csproj" />
+    <ProjectReference Include="..\AdleGraph.Wpf\AdleGraph.Wpf.csproj" />
     <ProjectReference Include="..\DatabaseMigration\DatabaseMigration.csproj" />
     <ProjectReference Include="..\DataAccess\DataAccess.csproj" />
     <ProjectReference Include="..\FakeDataProvider\FakeDataProvider.csproj" />

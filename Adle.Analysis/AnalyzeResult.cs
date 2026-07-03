@@ -1,9 +1,9 @@
 ﻿using AdleGraph.Interfaces;
 using System;
 
-namespace GUI_Simulation.SequencePattern
+namespace Adle.Analysis
 {
-    public class AnalizeResult
+    public class AnalyzeResult
     {
         public INode value { get; set; }
 

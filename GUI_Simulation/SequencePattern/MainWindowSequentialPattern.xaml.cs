@@ -1,7 +1,9 @@
 ﻿using AdleGraph;
 using AdleGraph.Interfaces;
+using AdleGraph.Wpf;
 using GUI_Simulation.AnomalyExploration;
-using GUI_Simulation.SequencePattern.AnalysisRuleDefinitions;
+using Adle.Analysis;
+using Adle.Analysis.Rules;
 using GUI_Simulation.SequencePattern.Scoring;
 using SequentialPattern;
 using System;
@@ -559,7 +561,7 @@ namespace GUI_Simulation.SequencePattern
             UpgradeReport(incomingNode, exceptedNode, analyzer.lastProbabilityDistributionOfNodes);
         }
 
-        private void AddToPredictionReport(INode incomingNode, INode exceptedNode, List<AnalizeResult> data)
+        private void AddToPredictionReport(INode incomingNode, INode exceptedNode, List<AnalyzeResult> data)
         {
             if (exceptedNode == null || incomingNode == null)
                 return;
@@ -649,7 +651,7 @@ namespace GUI_Simulation.SequencePattern
 
         private void SetPreviousExpectedAndIncomingNodeValuesAndSetBackgroundWithComparingNodes(INode incomingNode, INode expectedNode)
         {
-            AnalizeResult foundIncomingNode = null;
+            AnalyzeResult foundIncomingNode = null;
 
             if (incomingNode != null)
                 foundIncomingNode = getAnalyzer()?.lastProbabilityDistributionOfNodes?.Find(x => x.value.Name == incomingNode.Name);
@@ -696,7 +698,7 @@ namespace GUI_Simulation.SequencePattern
                 pnlNodeComparer.Background = new SolidColorBrush(Colors.WhiteSmoke);
         }
 
-        private void UpgradeReport(INode incommingNode, INode exceptedNode, List<AnalizeResult> data)
+        private void UpgradeReport(INode incommingNode, INode exceptedNode, List<AnalyzeResult> data)
         {
             if (incommingNode == null || exceptedNode == null)
                 return;
@@ -741,11 +743,11 @@ namespace GUI_Simulation.SequencePattern
         }
         private SequenceAnalyzer getAnalyzer(List<SequenceBarDTO> data = null)
         {
-            bool newAnalizer = false;
+            bool newAnalyzer = false;
             if (analyzer == null)
             {
                 analyzer = new SequenceAnalyzer();
-                newAnalizer = true;
+                newAnalyzer = true;
             }
 
             if (data == null)
@@ -753,13 +755,13 @@ namespace GUI_Simulation.SequencePattern
 
             analyzer.Data = data;
 
-            IAnalysisRule similarityRule = newAnalizer ? new SimilarityRule(1) : analyzer.Rules[0];
-            IAnalysisRule lcsRule = newAnalizer ? new LCSRule(2) : analyzer.Rules[1];
+            IAnalysisRule similarityRule = newAnalyzer ? new SimilarityRule(1) : analyzer.Rules[0];
+            IAnalysisRule lcsRule = newAnalyzer ? new LCSRule(2) : analyzer.Rules[1];
 
             similarityRule.setParams(new SoftmaxNormalizer(), new MinMaxNormalizer());
             lcsRule.setParams(LCSThreshold, new SoftmaxNormalizer(), new MinMaxNormalizer());
 
-            if (newAnalizer)
+            if (newAnalyzer)
             {
                 analyzer.Rules.Add(similarityRule);
                 analyzer.Rules.Add(lcsRule);
@@ -782,7 +784,7 @@ namespace GUI_Simulation.SequencePattern
             PersonPrediction = sequenceDTOforPersonPrediction != null ? sequenceDTOforPersonPrediction.Person : "";
         }
 
-        private void setNextExpectedNodeValue(INode node, List<AnalizeResult> data)
+        private void setNextExpectedNodeValue(INode node, List<AnalyzeResult> data)
         {
             if (data == null || data.Count <= 0)
             {
@@ -793,7 +795,7 @@ namespace GUI_Simulation.SequencePattern
 
             var probabilityData = data.OrderByDescending(x => x.probability).ToList();
 
-            AnalizeResult probabilityDistribution = probabilityData.FirstOrDefault();
+            AnalyzeResult probabilityDistribution = probabilityData.FirstOrDefault();
             NextExpectedNode = node == null ? "" : probabilityDistribution.ToString();
             _expectedNodeCache.Add(probabilityDistribution.value);
 

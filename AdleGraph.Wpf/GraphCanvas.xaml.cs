@@ -1,4 +1,4 @@
-using AdleGraph.Interfaces;
+﻿using AdleGraph.Interfaces;
 using System;
 using System.Collections.Generic;
 using System.Windows;
@@ -7,7 +7,7 @@ using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Shapes;
 
-namespace AdleGraph
+namespace AdleGraph.Wpf
 {
     public class X_Y_values
     {

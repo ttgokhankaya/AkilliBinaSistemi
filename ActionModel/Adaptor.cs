@@ -92,9 +92,10 @@ namespace ActionModel
 
         private void CreateAssembly(string name, string method, out object obje, out MethodInfo mInfo)
         {
-            string dll = @"C:\TURKTRUST\tfs\ADLE\AkilliBinaSistemi\GUI_Simulation\bin\Debug\SimulationObjects.dll";//"SimulationObjects";//TODO=> manifastten çek veya belli bir dizinden bütün dll'den çekerek yapılabilir, path manifestten çekilir.
-            string dllPath = dll;//$"{Environment.CurrentDirectory}\\{dll}.dll";
-            Assembly asm = Assembly.LoadFile(dllPath);
+            //TODO=> manifestten çek veya belli bir dizindeki bütün dll'lerden çekerek yapılabilir, path manifestten çekilir.
+            // Assembly.Load (LoadFile değil): zaten yüklü assembly'yi döndürür, böylece
+            // Device.Devices gibi statik registry'ler çağıran tarafla aynı kopyayı paylaşır.
+            Assembly asm = Assembly.Load("SimulationObjects");
 
             if (asm == null)
                 throw new Exception(); //TODO: Throw Exception assebly bulunamadı

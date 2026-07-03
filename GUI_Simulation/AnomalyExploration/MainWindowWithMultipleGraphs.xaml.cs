@@ -1,4 +1,8 @@
-﻿using SimulationObjects;
+﻿using Adle.Analysis;
+using Scenario = Adle.Analysis.Scenario;
+using Sensor = Adle.Analysis.Sensor;
+using Adle.Analysis.Rules;
+using SimulationObjects;
 using System;
 using System.Collections;
 using System.Collections.Generic;

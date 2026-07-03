@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace GUI_Simulation.SequencePattern.AnalysisRuleDefinitions
+namespace Adle.Analysis.Rules
 {
     public class MinMaxNormalizer : ICalculator
     {
@@ -33,9 +33,9 @@ namespace GUI_Simulation.SequencePattern.AnalysisRuleDefinitions
             return output;
         }
 
-        public static List<AnalizeResult> Calculate(List<AnalizeResult> data)
+        public static List<AnalyzeResult> Calculate(List<AnalyzeResult> data)
         {
-            List<AnalizeResult> output = new List<AnalizeResult>();
+            List<AnalyzeResult> output = new List<AnalyzeResult>();
 
             if (data == null || data.Count <= 0)
                 return null;
@@ -43,7 +43,7 @@ namespace GUI_Simulation.SequencePattern.AnalysisRuleDefinitions
 
             if (data.Count == 1)
             {
-                output.Add(new AnalizeResult()
+                output.Add(new AnalyzeResult()
                 {
                     value = data[0].value,
                     countOfNode = data[0].countOfNode,
@@ -58,7 +58,7 @@ namespace GUI_Simulation.SequencePattern.AnalysisRuleDefinitions
             foreach (var input in data)
             {
                 double result = (input.countOfNode - min) / (max - min);
-                output.Add(new AnalizeResult()
+                output.Add(new AnalyzeResult()
                 {
                     value = input.value,
                     countOfNode = input.countOfNode,

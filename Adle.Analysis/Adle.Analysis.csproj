@@ -1,9 +1,12 @@
 <Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <TargetFramework>net8.0</TargetFramework>
-    <AssemblyName>IoC</AssemblyName>
-    <RootNamespace>IoC</RootNamespace>
+    <AssemblyName>Adle.Analysis</AssemblyName>
+    <RootNamespace>Adle.Analysis</RootNamespace>
     <Nullable>disable</Nullable>
     <ImplicitUsings>disable</ImplicitUsings>
   </PropertyGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\AdleGraph\AdleGraph.csproj" />
+  </ItemGroup>
 </Project>

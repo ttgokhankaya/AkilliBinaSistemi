@@ -1,4 +1,6 @@
-﻿using AdleGraph.Interfaces;
+﻿using Adle.Analysis;
+using Adle.Analysis.Rules;
+using AdleGraph.Interfaces;
 using GUI_Simulation.AnomalyExploration;
 using SequentialPattern;
 using SimulationObjects;
@@ -137,7 +139,7 @@ namespace GUI_Simulation.SequencePattern
 
         public List<Sequence<INode>> SequenceList { get; set; } = new List<Sequence<INode>>();
 
-        public List<AnomalyExploration.Scenario> Scenarios { get; set; } = new List<AnomalyExploration.Scenario>();
+        public List<Adle.Analysis.Scenario> Scenarios { get; set; } = new List<Adle.Analysis.Scenario>();
 
         public IGraph SelectedGraph
         {
@@ -292,11 +294,11 @@ namespace GUI_Simulation.SequencePattern
                 return;
 
             var foundSensor = Sensors.Where(x => x.Name == ((DeviceBase)newNode.Tag).Name).FirstOrDefault();
-            AnomalyExploration.Scenario scenarioToSent = null;
+            Adle.Analysis.Scenario scenarioToSent = null;
 
             if (isNewSequence)
             {
-                AnomalyExploration.Scenario newScenario = new AnomalyExploration.Scenario()
+                Adle.Analysis.Scenario newScenario = new Adle.Analysis.Scenario()
                 { name = $"{Scenarios.Count + 1 }. Senaryo" };
                 newScenario.sensors.Add(foundSensor);
                 Scenarios.Add(newScenario);
@@ -434,7 +436,7 @@ namespace GUI_Simulation.SequencePattern
         public bool Reset()
         {
             Sequence = new Sequence<INode>();
-            Scenarios = new List<AnomalyExploration.Scenario>();
+            Scenarios = new List<Adle.Analysis.Scenario>();
             SequenceList = new List<Sequence<INode>>();
             _currentNode = null;
             return true;
@@ -586,10 +588,10 @@ namespace GUI_Simulation.SequencePattern
                 return false;
             }
 
-            Scenarios = new List<AnomalyExploration.Scenario>();
+            Scenarios = new List<Adle.Analysis.Scenario>();
             for (int i = 0; i < _scenarioCount; i++)
             {
-                AnomalyExploration.Scenario newScenario = new AnomalyExploration.Scenario()
+                Adle.Analysis.Scenario newScenario = new Adle.Analysis.Scenario()
                 { name = $"{i + 1}. Senaryo" };
 
                 for (int j = 0; j < sequences[i].Count; j++)
