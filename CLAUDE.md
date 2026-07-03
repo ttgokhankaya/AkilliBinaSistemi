@@ -66,7 +66,7 @@ The solution has two main entry-point applications:
 Naming quirks to be aware of:
 
 - Folder `FakeDevices/` contains project **`SimulationObjects`**; folder `FakeDevices.Test/` contains project **`SimulationObjects.Test`**.
-- Domain code mixes Turkish and English names (`Isik` = light, `Oturma Odası` = living room, `FeildModel` is an intentional/legacy spelling). Match the convention of the file you edit; don't rename existing members.
+- Domain code mixes Turkish and English names (`Isik` = light, `Oturma Odası` = living room). Match the convention of the file you edit; don't rename existing members.
 
 ### Two Separate Database Contexts
 

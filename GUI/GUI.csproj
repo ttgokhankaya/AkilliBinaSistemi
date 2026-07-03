@@ -19,7 +19,7 @@
     <ProjectReference Include="..\DomainObjects\DomainObjects.csproj" />
     <ProjectReference Include="..\FakeDataProvider\FakeDataProvider.csproj" />
     <ProjectReference Include="..\FakeDevices\SimulationObjects.csproj" />
-    <ProjectReference Include="..\FeildModel\FeildModel.csproj" />
+    <ProjectReference Include="..\FieldModel\FieldModel.csproj" />
     <ProjectReference Include="..\ItemModel\ItemModel.csproj" />
     <ProjectReference Include="..\MemoryModel\MemoryModel.csproj" />
     <ProjectReference Include="..\SharedObject\SharedObject.csproj" />

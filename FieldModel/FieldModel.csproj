@@ -1,8 +1,8 @@
 <Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <TargetFramework>net8.0-windows</TargetFramework>
-    <AssemblyName>FeildModel</AssemblyName>
-    <RootNamespace>FeildModel</RootNamespace>
+    <AssemblyName>FieldModel</AssemblyName>
+    <RootNamespace>FieldModel</RootNamespace>
     <Nullable>disable</Nullable>
     <ImplicitUsings>disable</ImplicitUsings>
   </PropertyGroup>

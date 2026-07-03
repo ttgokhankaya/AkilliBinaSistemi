@@ -15,7 +15,7 @@ This codebase implements and extends the M.Sc. thesis:
 | `Adle.Analysis` | **Platform-independent analysis core** (net8.0): `SequenceAnalyzer`, rule pipeline (`SimilarityRule`, `LCSRule`), min-max / softmax / z-score normalizers |
 | `AdleGraph` | **Platform-independent graph engine** (net8.0): weighted nodes/edges, sequence generation, LCS computation |
 | `AdleGraph.Wpf` | WPF `GraphCanvas` visualization component |
-| `SharedObject`, `ActionModel`, `ItemModel`, `FeildModel`, `MemoryModel` | ADLE layered device/area/memory abstraction (see thesis §4.2.1) |
+| `SharedObject`, `ActionModel`, `ItemModel`, `FieldModel`, `MemoryModel` | ADLE layered device/area/memory abstraction (see thesis §4.2.1) |
 | `DataAccess` | Generic repository pattern (EF6 + Npgsql primary, MongoDB optional) |
 | `DatabaseMigration` / `SimulationDB_Migrations` | Two independent EF6 migration stacks over PostgreSQL `adle_sim` |
 | `GUI_Simulation` | Main WPF app: sequential-pattern simulation, anomaly exploration, t-SNE / Random Forest views |

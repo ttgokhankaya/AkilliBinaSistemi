@@ -27,7 +27,7 @@ namespace Utility.Converters
             else
             {
 
-                Assembly asm = Assembly.LoadFile($"{Environment.CurrentDirectory}\\FeildModel.dll");
+                Assembly asm = Assembly.Load("FieldModel");
                 if (asm == null)
                     throw new Exception(); //TODO: Throw Exception
 

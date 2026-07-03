@@ -22,7 +22,7 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DomainObjects", "DomainObje
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FakeDataProvider.Test", "FakeDataProvider.Test\FakeDataProvider.Test.csproj", "{AC933555-1C95-483E-9BB3-5912A0FEB794}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FeildModel", "FeildModel\FeildModel.csproj", "{8E7F2969-8FD4-47CC-A38B-6E05D2E3A336}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FieldModel", "FieldModel\FieldModel.csproj", "{8E7F2969-8FD4-47CC-A38B-6E05D2E3A336}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ItemModel", "ItemModel\ItemModel.csproj", "{81B0FBD5-BF90-4042-845E-572A1E34BABF}"
 EndProject
