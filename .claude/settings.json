@@ -20,7 +20,14 @@
       "PowerShell(docker ps:*)",
       "PowerShell(git status:*)",
       "PowerShell(git diff:*)",
-      "PowerShell(git log:*)"
+      "PowerShell(git log:*)",
+      "PowerShell(Set-Location *)",
+      "PowerShell(Get-ChildItem *)",
+      "PowerShell(Get-Content *)",
+      "PowerShell(git grep *)",
+      "PowerShell(Write-Output *)",
+      "PowerShell(Select-String *)",
+      "mcp__plugin_context-mode_context-mode__ctx_search"
     ],
     "ask": [
       "Bash(docker-compose down -v:*)",
