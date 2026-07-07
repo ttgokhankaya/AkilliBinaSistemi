@@ -15,6 +15,11 @@ namespace DatabaseMigration.Migrations
 
         protected override void Seed(DatabaseMigration.DB context)
         {
+            SeedData(context);
+        }
+
+        public static void SeedData(DatabaseMigration.DB context)
+        {
             if (context.AreaTypes.Any()) return;
 
             var now = DateTime.Now;

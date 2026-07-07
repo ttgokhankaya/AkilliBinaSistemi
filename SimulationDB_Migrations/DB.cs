@@ -10,7 +10,7 @@ namespace SimulationDB_Migrations
     {
         private const string DefaultConnStr = "Host=localhost;Port=5432;Database=adle_sim;Username=adle_user;Password=Password1;";
 
-        internal static string ConnStr =>
+        public static string ConnStr =>
             System.Environment.GetEnvironmentVariable("ADLE_DB_CONNECTION") ?? DefaultConnStr;
 
         public DB() : base(new NpgsqlConnection(ConnStr), contextOwnsConnection: true)
@@ -19,6 +19,9 @@ namespace SimulationDB_Migrations
 
         protected override void OnModelCreating(DbModelBuilder modelBuilder)
         {
+            // Align the runtime model with the "public" schema used by the
+            // migrations / CreateIfNotExists, instead of EF6's default dbo.*.
+            modelBuilder.HasDefaultSchema("public");
             modelBuilder.Entity<Actor>().ToTable("Actor");
         }
 
