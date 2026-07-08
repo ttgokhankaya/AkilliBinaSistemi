@@ -1,4 +1,5 @@
 using Adle.Api.Data;
+using Adle.Api.MlClient;
 using Adle.Analysis.Prediction;
 using Adle.Contracts;
 using Microsoft.EntityFrameworkCore;
@@ -17,6 +18,18 @@ var connectionString =
     Environment.GetEnvironmentVariable("ADLE_DB_CONNECTION")
     ?? builder.Configuration.GetConnectionString("Adle");
 builder.Services.AddDbContext<AdleDbContext>(options => options.UseNpgsql(connectionString));
+
+// Typed HttpClient for the Python ml_service. Base URL from ML_SERVICE_URL or
+// config ("MlService:BaseUrl"), defaulting to the local docker-compose port.
+var mlBaseUrl =
+    Environment.GetEnvironmentVariable("ML_SERVICE_URL")
+    ?? builder.Configuration["MlService:BaseUrl"]
+    ?? "http://localhost:8000/";
+builder.Services.AddHttpClient<MlServiceClient>(client =>
+{
+    client.BaseAddress = new Uri(mlBaseUrl);
+    client.Timeout = TimeSpan.FromSeconds(120);
+});
 
 // Allow the Vite dev server to call the API during development.
 const string DevCors = "dev-frontend";
@@ -110,6 +123,17 @@ app.MapPost("/api/analysis/predict", (PredictRequest req) =>
         distribution);
 })
     .WithName("PredictNextStep")
+    .WithOpenApi();
+
+// Anomaly endpoints proxy the Python ml_service (already web-native).
+app.MapPost("/api/anomaly/tsne", async (TsneRequestDto req, MlServiceClient ml, CancellationToken ct) =>
+        await ml.ComputeTsneAsync(req, ct))
+    .WithName("ComputeTsne")
+    .WithOpenApi();
+
+app.MapPost("/api/anomaly/random-forest", async (RandomForestRequestDto req, MlServiceClient ml, CancellationToken ct) =>
+        await ml.ComputeRandomForestAsync(req, ct))
+    .WithName("ComputeRandomForest")
     .WithOpenApi();
 
 app.Run();

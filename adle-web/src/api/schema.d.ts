@@ -68,6 +68,38 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/anomaly/tsne": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: operations["ComputeTsne"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/anomaly/random-forest": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: operations["ComputeRandomForest"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
 }
 export type webhooks = Record<string, never>;
 export interface components {
@@ -125,9 +157,30 @@ export interface components {
             ruleUsed?: string | null;
             distribution?: components["schemas"]["NextNodeProbability"][] | null;
         };
+        RandomForestRequestDto: {
+            s0?: number[][] | null;
+            s1?: number[][] | null;
+            allObservations?: number[][] | null;
+            /** Format: int32 */
+            nTrees?: number;
+        };
+        RandomForestResponseDto: {
+            proximityMatrix?: number[][] | null;
+            treeTexts?: string[] | null;
+        };
         TrainingSequenceDto: {
             tokens?: string[] | null;
             person?: string | null;
+        };
+        TsneRequestDto: {
+            observations?: number[][] | null;
+            /** Format: double */
+            perplexity?: number;
+            /** Format: int32 */
+            nComponents?: number;
+        };
+        TsneResponseDto: {
+            output?: number[][] | null;
         };
     };
     responses: never;
@@ -218,6 +271,54 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["PredictResponse"];
+                };
+            };
+        };
+    };
+    ComputeTsne: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["TsneRequestDto"];
+            };
+        };
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["TsneResponseDto"];
+                };
+            };
+        };
+    };
+    ComputeRandomForest: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["RandomForestRequestDto"];
+            };
+        };
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["RandomForestResponseDto"];
                 };
             };
         };
