@@ -195,8 +195,99 @@ def _run_hmm(req: SequenceBenchmarkRequest):
     return {"test": out}
 
 
+def _run_lstm(req: SequenceBenchmarkRequest):
+    import torch
+    import torch.nn as nn
+
+    torch.manual_seed(0)
+    vocab, idx = _build_vocab(req.train, req.test)
+    V = len(vocab)
+    if V == 0:
+        return {"test": []}
+    labels = sorted({s.label for s in req.train if s.label})
+    lab_idx = {l: i for i, l in enumerate(labels)}
+    E, H, epochs = 32, 64, 25
+
+    enc = lambda toks: torch.tensor([idx[t] for t in toks], dtype=torch.long)
+    train_ids = [enc(s.tokens) for s in req.train if len(s.tokens) >= 2]
+
+    # ---- next-token language model ----
+    class LM(nn.Module):
+        def __init__(self):
+            super().__init__()
+            self.emb = nn.Embedding(V, E)
+            self.lstm = nn.LSTM(E, H, batch_first=True)
+            self.out = nn.Linear(H, V)
+
+        def forward(self, x):               # x: (T,)
+            e = self.emb(x).unsqueeze(0)    # (1,T,E)
+            o, _ = self.lstm(e)             # (1,T,H)
+            return self.out(o.squeeze(0))   # (T,V)
+
+    lm = LM()
+    opt = torch.optim.Adam(lm.parameters(), lr=0.01)
+    loss_fn = nn.CrossEntropyLoss()
+    for _ in range(epochs):
+        for ids in train_ids:
+            opt.zero_grad()
+            logits = lm(ids[:-1])           # (T-1,V)
+            loss = loss_fn(logits, ids[1:])
+            loss.backward()
+            opt.step()
+
+    # ---- label classifier ----
+    clf = None
+    if labels:
+        class Clf(nn.Module):
+            def __init__(self):
+                super().__init__()
+                self.emb = nn.Embedding(V, E)
+                self.lstm = nn.LSTM(E, H, batch_first=True)
+                self.out = nn.Linear(H, len(labels))
+
+            def forward(self, x):
+                e = self.emb(x).unsqueeze(0)
+                o, _ = self.lstm(e)         # (1,T,H)
+                return self.out(o.squeeze(0))  # (T, L) label logits per timestep
+
+        clf = Clf()
+        optc = torch.optim.Adam(clf.parameters(), lr=0.01)
+        clf_pairs = [(enc(s.tokens), lab_idx[s.label])
+                     for s in req.train if s.label and len(s.tokens) >= 1]
+        for _ in range(epochs):
+            for ids, y in clf_pairs:
+                optc.zero_grad()
+                logits = clf(ids)           # (T,L)
+                # supervise the final timestep (whole-sequence label)
+                loss = loss_fn(logits[-1:].clone(), torch.tensor([y]))
+                loss.backward()
+                optc.step()
+
+    out = []
+    with torch.no_grad():
+        for s in req.test:
+            ids = enc(s.tokens)
+            steps = []
+            if len(ids) >= 2:
+                lm_logits = lm(ids[:-1])            # (L-1, V): row t predicts ids[t+1]
+                clf_logits = clf(ids) if clf is not None else None
+                for k in range(1, len(ids)):
+                    row = lm_logits[k - 1]
+                    topk = torch.topk(row, min(req.top_k, V)).indices.tolist()
+                    ranked = [vocab[i] for i in topk]
+                    label = ""
+                    if clf_logits is not None:
+                        label = labels[int(torch.argmax(clf_logits[k - 1]))]
+                    steps.append({"ranked": ranked, "label": label})
+            out.append({"steps": steps})
+    return {"test": out}
+
+
 @app.post("/sequence-benchmark")
 def sequence_benchmark(req: SequenceBenchmarkRequest):
-    if req.model.lower() == "hmm":
+    model = req.model.lower()
+    if model == "hmm":
         return _run_hmm(req)
+    if model == "lstm":
+        return _run_lstm(req)
     raise HTTPException(status_code=400, detail=f"unknown model '{req.model}'")

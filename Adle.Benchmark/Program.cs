@@ -75,7 +75,7 @@ namespace Adle.Benchmark
             // Python-backed baselines (HMM now, LSTM once added) via the ML service.
             if (RemoteBenchmark.IsServiceUp())
             {
-                foreach (var (model, display) in new[] { ("hmm", "HMM (hmmlearn)") })
+                foreach (var (model, display) in new[] { ("hmm", "HMM (hmmlearn)"), ("lstm", "LSTM (torch)") })
                 {
                     try { rows.Add(EvaluateRemote(model, display, train, test)); }
                     catch (Exception ex) { Console.WriteLine($"[{display}] skipped: {ex.Message}"); }
