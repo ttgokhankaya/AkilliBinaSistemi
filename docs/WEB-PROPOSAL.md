@@ -25,9 +25,9 @@ references the same assemblies and exposes them over HTTP.
    │  REST/JSON, DI, EF Core      │     └──────────────────────┘
    └────────────────────┬─────────┘
                         │  HTTP/JSON
-              ┌─────────┴──────────┐
-              │  Adle.Web (Blazor) │   ← browser UI
-              └────────────────────┘
+              ┌──────────────────────────┐
+              │  adle-web (React + Vite) │   ← browser UI
+              └──────────────────────────┘
 ```
 
 ## 2. Recommended stack
@@ -36,14 +36,16 @@ references the same assemblies and exposes them over HTTP.
 |---|---|---|
 | Backend API | **ASP.NET Core 8 Web API** | References `Adle.Analysis` + `AdleGraph` directly; first-class DI, config, HTTP client for the ML service |
 | Data access | **EF Core 8 + Npgsql** (scaffolded from `db/schema.sql`) | Permanently retires the broken EF6 migration story; native to ASP.NET Core DI; proper migrations going forward |
-| Frontend | **Blazor** (WASM or Server) | All-C# stack, matches your skill set; shares DTOs with the backend |
-| Charts / viz | Plotly.js via JS interop (or ECharts) | t-SNE scatter + decision-tree/graph views need a real charting lib; **this is the one place Blazor costs more than React** |
+| Frontend | **React + TypeScript (Vite)** | Richest charting/graph ecosystem; standard tooling. Backend stays identical — only the FE layer differs from an all-C# stack |
+| Charts / viz | **Plotly (`react-plotly.js`)** | t-SNE scatter + decision-tree/graph views need a real charting lib; closest to the Plotly experience already used on the WPF/Python side, zoom/pan out of the box |
+| Type sharing | **`openapi-typescript`** from the API's Swagger | React can't reference the C# DTOs directly; instead generate TS types from the OpenAPI doc at build time so the contract stays single-source (no hand-maintained drift) |
 | ML | existing **`ml_service`** unchanged | already an HTTP service; the API proxies `/tsne` and `/random-forest` |
 
-**Alternative to flag:** if the visualization ends up dominating the effort
-(interactive graph editing, large scatter plots), a **React + TypeScript**
-frontend has a richer charting/graph ecosystem. Keep the backend identical;
-only the FE choice changes. Decide after the first viz spike.
+**Decision (2026-07):** React chosen over Blazor for the frontend. The one real
+cost vs. Blazor is losing shared C# DTOs — resolved by generating TypeScript
+types from the API's OpenAPI/Swagger output (`openapi-typescript`), so the
+contract remains single-source. Everything backend-side (ASP.NET Core API,
+EF Core, `ml_service`) is identical regardless of FE choice.
 
 ### EF Core vs. EF6
 
@@ -68,14 +70,24 @@ Adle.Web.sln
 │  ├─ Endpoints/        Areas, Devices, Operations, Graph, Analysis, Anomaly
 │  ├─ MlClient/         typed HttpClient for ml_service (reuse existing DTOs)
 │  └─ Program.cs
-├─ Adle.Web/            Blazor frontend
-├─ Adle.Contracts/      shared request/response DTOs (referenced by API + Web)
+├─ Adle.Contracts/      C# request/response DTOs (referenced by the API; source for generated TS types)
 └─ (references ../AdleGraph, ../Adle.Analysis via ProjectReference or NuGet)
+
+adle-web/                 React + TypeScript frontend (Vite, not a .csproj)
+├─ src/
+│  ├─ api/               generated TS types (openapi-typescript) + fetch client
+│  ├─ pages/             Areas, Devices, Operations, Analysis, Anomaly
+│  └─ charts/            Plotly wrappers (t-SNE scatter, graph/tree views)
+├─ vite.config.ts        dev server proxies /api → Adle.Api
+└─ package.json
 ```
 
 The web solution lives on a separate `web` branch so it evolves in parallel
-without destabilising `master`. The shared core libraries are referenced by
-relative `ProjectReference` (or packed as local NuGet once stable).
+without destabilising `master`. The shared **C#** core libraries are referenced
+by relative `ProjectReference` (or packed as local NuGet once stable); the React
+app consumes the backend purely over HTTP, with its TypeScript types generated
+from the API's Swagger doc. In dev, Vite serves the SPA and proxies `/api` to
+`Adle.Api`; in prod the API serves the built static assets.
 
 ## 4. API surface (maps 1:1 to current WPF features)
 
@@ -103,9 +115,9 @@ benchmark and the web API both call the same new services.
 - **P0 – Spike (½ day):** scaffold `Adle.Api`, wire EF Core from `schema.sql`,
   one real endpoint (`GET /api/areas`) returning seeded data. Proves the core
   reuse + DB path end to end.
-- **P1 – Read-only API + Blazor shell:** list areas/devices/operations; Blazor
-  pages rendering them. One viz spike (t-SNE scatter via Plotly interop) to
-  validate the FE charting decision.
+- **P1 – Read-only API + React shell:** list areas/devices/operations; React
+  pages rendering them, with TS types generated from Swagger. One viz spike
+  (t-SNE scatter via `react-plotly.js`) to validate the FE charting decision.
 - **P2 – Analysis endpoints:** `/api/analysis/predict` + `/api/anomaly/*` over
   the extracted services. Feature parity with the WPF analysis screens.
 - **P3 – Write paths + graph editing:** create/run graphs, manage entities.
