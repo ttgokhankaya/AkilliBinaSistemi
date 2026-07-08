@@ -1,4 +1,5 @@
 using Adle.Api.Data;
+using Adle.Api.Endpoints;
 using Adle.Api.MlClient;
 using Adle.Analysis.Prediction;
 using Adle.Contracts;
@@ -135,5 +136,8 @@ app.MapPost("/api/anomaly/random-forest", async (RandomForestRequestDto req, MlS
         await ml.ComputeRandomForestAsync(req, ct))
     .WithName("ComputeRandomForest")
     .WithOpenApi();
+
+// P3 write paths (create/update/delete for areas, devices, operations).
+app.MapWriteEndpoints();
 
 app.Run();
