@@ -72,6 +72,20 @@ namespace Adle.Benchmark
                 rows.Add(EvaluatePredictor(p, test, labelKind));
             }
 
+            // Python-backed baselines (HMM now, LSTM once added) via the ML service.
+            if (RemoteBenchmark.IsServiceUp())
+            {
+                foreach (var (model, display) in new[] { ("hmm", "HMM (hmmlearn)") })
+                {
+                    try { rows.Add(EvaluateRemote(model, display, train, test)); }
+                    catch (Exception ex) { Console.WriteLine($"[{display}] skipped: {ex.Message}"); }
+                }
+            }
+            else
+            {
+                Console.WriteLine("(ML service down — skipping HMM/LSTM; `docker-compose up -d ml_service`)\n");
+            }
+
             PrintTable(rows, labelKind);
         }
 
@@ -109,6 +123,45 @@ namespace Adle.Benchmark
             return new Metrics
             {
                 Model = predictor.Name,
+                N = scorer.Total,
+                Top1 = scorer.Top1Accuracy,
+                ThesisAcc = scorer.Accuracy,
+                Precision = scorer.Precision,
+                Recall = scorer.Recall,
+                F1 = scorer.F1,
+                LabelAcc = labelPredicted == 0 ? 0 : (double)labelCorrect / labelPredicted,
+            };
+        }
+
+        private static Metrics EvaluateRemote(
+            string model, string display,
+            List<(string label, List<string> tokens)> train,
+            List<(string label, List<string> tokens)> test,
+            string labelKind = null)
+        {
+            var results = RemoteBenchmark.Run(model, train, test);
+            var scorer = new PredictionScorer();
+            int labelPredicted = 0, labelCorrect = 0;
+
+            for (int i = 0; i < test.Count && i < results.Count; i++)
+            {
+                var tokens = test[i].tokens;
+                var steps = results[i].Steps;
+                for (int k = 1; k < tokens.Count && (k - 1) < steps.Count; k++)
+                {
+                    var step = steps[k - 1];
+                    scorer.Record(step.Ranked, tokens[k]);
+                    if (!string.IsNullOrEmpty(step.Label))
+                    {
+                        labelPredicted++;
+                        if (step.Label == test[i].label) labelCorrect++;
+                    }
+                }
+            }
+
+            return new Metrics
+            {
+                Model = display,
                 N = scorer.Total,
                 Top1 = scorer.Top1Accuracy,
                 ThesisAcc = scorer.Accuracy,
