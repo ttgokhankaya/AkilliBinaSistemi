@@ -1,4 +1,5 @@
 using Adle.Api.Data;
+using Adle.Analysis.Prediction;
 using Adle.Contracts;
 using Microsoft.EntityFrameworkCore;
 
@@ -80,6 +81,35 @@ app.MapGet("/api/operations", async (AdleDbContext db) =>
             o.Duration.TotalSeconds))
         .ToListAsync())
     .WithName("GetOperations")
+    .WithOpenApi();
+
+// Next-step + person prediction over the extracted Adle.Analysis pipeline
+// (SimilarityRule -> LCSRule, min-max + softmax). Same service the console
+// benchmark uses — the web layer just adapts JSON in/out.
+app.MapPost("/api/analysis/predict", (PredictRequest req) =>
+{
+    var service = new PredictionService(req.LcsThreshold);
+
+    var order = 0;
+    var training = req.Training
+        .Select(t => SequenceFactory.ToTrainingBar(t.Tokens, t.Person, order++))
+        .ToList();
+
+    var result = service.PredictNextStep(SequenceFactory.FromNodeNames(req.Prefix), training);
+
+    var distribution = result.NextStepDistribution
+        .Where(x => x.value != null)
+        .Select(x => new NextNodeProbability(x.value.Name, x.probability))
+        .ToList();
+
+    return new PredictResponse(
+        result.PredictedNextNode?.Name,
+        result.PredictedPerson,
+        result.MatchCount,
+        result.RuleUsed,
+        distribution);
+})
+    .WithName("PredictNextStep")
     .WithOpenApi();
 
 app.Run();

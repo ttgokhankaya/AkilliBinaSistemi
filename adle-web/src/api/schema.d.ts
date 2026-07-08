@@ -52,6 +52,22 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/analysis/predict": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: operations["PredictNextStep"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
 }
 export type webhooks = Record<string, never>;
 export interface components {
@@ -81,6 +97,11 @@ export interface components {
             areaId?: number;
             areaName?: string | null;
         };
+        NextNodeProbability: {
+            node?: string | null;
+            /** Format: double */
+            probability?: number;
+        };
         OperationDto: {
             /** Format: int32 */
             id?: number;
@@ -89,6 +110,24 @@ export interface components {
             startTime?: string;
             /** Format: double */
             durationSeconds?: number;
+        };
+        PredictRequest: {
+            training?: components["schemas"]["TrainingSequenceDto"][] | null;
+            prefix?: string[] | null;
+            /** Format: int32 */
+            lcsThreshold?: number;
+        };
+        PredictResponse: {
+            predictedNextNode?: string | null;
+            predictedPerson?: string | null;
+            /** Format: int32 */
+            matchCount?: number;
+            ruleUsed?: string | null;
+            distribution?: components["schemas"]["NextNodeProbability"][] | null;
+        };
+        TrainingSequenceDto: {
+            tokens?: string[] | null;
+            person?: string | null;
         };
     };
     responses: never;
@@ -155,6 +194,30 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["OperationDto"][];
+                };
+            };
+        };
+    };
+    PredictNextStep: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["PredictRequest"];
+            };
+        };
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PredictResponse"];
                 };
             };
         };
