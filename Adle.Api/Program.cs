@@ -53,4 +53,33 @@ app.MapGet("/api/areas", async (AdleDbContext db) =>
     .WithName("GetAreas")
     .WithOpenApi();
 
+app.MapGet("/api/devices", async (AdleDbContext db) =>
+    await db.DeviceBases
+        .AsNoTracking()
+        .OrderBy(d => d.Id)
+        .Select(d => new DeviceDto(
+            d.Id,
+            d.Name,
+            d.Ip,
+            d.State,
+            d.Discriminator,
+            d.AreaId,
+            d.Area != null ? d.Area.Name : null))
+        .ToListAsync())
+    .WithName("GetDevices")
+    .WithOpenApi();
+
+app.MapGet("/api/operations", async (AdleDbContext db) =>
+    await db.Operations
+        .AsNoTracking()
+        .OrderBy(o => o.StartTime)
+        .Select(o => new OperationDto(
+            o.Id,
+            o.Name,
+            o.StartTime,
+            o.Duration.TotalSeconds))
+        .ToListAsync())
+    .WithName("GetOperations")
+    .WithOpenApi();
+
 app.Run();
