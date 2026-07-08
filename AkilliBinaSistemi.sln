@@ -56,6 +56,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Adle.Analysis", "Adle.Analy
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Adle.Analysis.Test", "Adle.Analysis.Test\Adle.Analysis.Test.csproj", "{D3536B16-CDF3-45A4-96EB-1D89EBDD68E3}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Adle.Benchmark", "Adle.Benchmark\Adle.Benchmark.csproj", "{59DAE394-9A11-428D-8454-84DFAEFA5ED2}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -330,6 +332,18 @@ Global
 		{D3536B16-CDF3-45A4-96EB-1D89EBDD68E3}.Release|x64.Build.0 = Release|Any CPU
 		{D3536B16-CDF3-45A4-96EB-1D89EBDD68E3}.Release|x86.ActiveCfg = Release|Any CPU
 		{D3536B16-CDF3-45A4-96EB-1D89EBDD68E3}.Release|x86.Build.0 = Release|Any CPU
+		{59DAE394-9A11-428D-8454-84DFAEFA5ED2}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{59DAE394-9A11-428D-8454-84DFAEFA5ED2}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{59DAE394-9A11-428D-8454-84DFAEFA5ED2}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{59DAE394-9A11-428D-8454-84DFAEFA5ED2}.Debug|x64.Build.0 = Debug|Any CPU
+		{59DAE394-9A11-428D-8454-84DFAEFA5ED2}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{59DAE394-9A11-428D-8454-84DFAEFA5ED2}.Debug|x86.Build.0 = Debug|Any CPU
+		{59DAE394-9A11-428D-8454-84DFAEFA5ED2}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{59DAE394-9A11-428D-8454-84DFAEFA5ED2}.Release|Any CPU.Build.0 = Release|Any CPU
+		{59DAE394-9A11-428D-8454-84DFAEFA5ED2}.Release|x64.ActiveCfg = Release|Any CPU
+		{59DAE394-9A11-428D-8454-84DFAEFA5ED2}.Release|x64.Build.0 = Release|Any CPU
+		{59DAE394-9A11-428D-8454-84DFAEFA5ED2}.Release|x86.ActiveCfg = Release|Any CPU
+		{59DAE394-9A11-428D-8454-84DFAEFA5ED2}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
