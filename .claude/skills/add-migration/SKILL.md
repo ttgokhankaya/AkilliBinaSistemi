@@ -1,12 +1,31 @@
 ---
 name: add-migration
 description: >-
-  Add or fix an EF6 database migration in the correct migration stack
-  (DatabaseMigration or SimulationDB_Migrations). Use when the user wants to add
-  a column/table/relationship, change an entity, or fix "migration hatası" at startup.
+  Change the database schema. NOTE: this project no longer uses EF6 migrations
+  at runtime — the schema lives in db/schema.sql. Use when the user wants to add
+  a column/table/relationship or change an entity.
 ---
 
-# Add Migration
+# Change the Schema (db/schema.sql)
+
+> **Important:** Runtime schema creation does NOT use EF6 `DbMigrator`. The
+> SQL Server → PostgreSQL port left the migration snapshots inconsistent, so
+> the schema is now defined in **`db/schema.sql`** (idempotent DDL, `public`
+> schema) and executed at startup by `GUI_Simulation/App.xaml.cs`. To change
+> the schema:
+>
+> 1. Edit the entity class (and its `DbSet` in the owning `DB.cs`).
+> 2. Add the corresponding `CREATE TABLE`/`ALTER TABLE ... IF NOT EXISTS` (or a
+>    new idempotent statement) to `db/schema.sql`, in dependency order.
+> 3. If you added a table, decide the owning context (see below) and add the
+>    `DbSet`. Never create an FK across the two contexts.
+> 4. Recreate the local DB to test: drop the `public` schema (or
+>    `docker-compose down -v`, destroys data) and relaunch `GUI_Simulation`.
+>
+> The `*/Migrations/` folders are kept for historical reference only — do not
+> rely on `Update-Database` / `DbMigrator`.
+
+## Which context owns the entity
 
 The solution has **two independent EF6 migration stacks** targeting the same PostgreSQL DB (`adle_sim`). Putting a change in the wrong one breaks startup auto-migration.
 
@@ -21,21 +40,19 @@ A new entity goes in the stack of whichever domain it belongs to. **Never** crea
 
 ## Step 2 — Change the model
 
-Edit the entity class and the owning `DB.cs` (DbSet, fluent config) following the patterns already in that project.
+Edit the entity class and the owning `DB.cs` (DbSet, fluent config) following the patterns already in that project. Keep `HasDefaultSchema("public")`.
 
-## Step 3 — Create the migration
+## Step 3 — Update db/schema.sql
 
-Look at the existing migration classes in the owning project and add a new migration following the same structure and naming (timestamp prefix, `DbMigration` subclass with `Up()`/`Down()`). EF6 + Npgsql quirks (identifier casing, sequences) — copy what the existing migrations do, not SQL Server defaults.
+Add the matching idempotent DDL to `db/schema.sql`: `CREATE TABLE IF NOT EXISTS public."X" (...)` for a new table (place it after the tables it references), or a guarded `ALTER TABLE` for a new column. Match EF6 type mapping: `int`→`integer` (identity PK → `serial`), `string`→`text`, `double`→`double precision`, `bool`→`boolean`, `DateTime`→`timestamp`, `TimeSpan`→`interval`.
 
-If Visual Studio is available, the PMC alternative is `Add-Migration <Name>` with Default Project set to the owning migration project.
-
-## Step 4 — Verify both paths
+## Step 4 — Verify from a clean database
 
 1. `dotnet build AkilliBinaSistemi.sln`
-2. **Upgrade path:** with infra up (`docker-compose up -d`), run GUI_Simulation or `Update-Database` — auto-migration in `App.xaml.cs` must apply the new migration cleanly.
-3. **Fresh path:** confirm the migration chain works from an empty DB. Local-only data can be reset with `docker-compose down -v && docker-compose up -d` (**destroys data — ask first**).
-4. Inspect the result: `docker-compose exec postgres psql -U adle_user -d adle_sim -c "\d <table>"`
+2. Reset the schema: `docker-compose exec postgres psql -U adle_user -d adle_sim -c "DROP SCHEMA public CASCADE; CREATE SCHEMA public;"` (local dev data only — **destroys data**).
+3. Launch `GUI_Simulation` (or apply `db/schema.sql` with `psql`) and confirm no "Veritabanı Hatası" dialog and that seed data lands.
+4. Inspect: `docker-compose exec postgres psql -U adle_user -d adle_sim -c "\d public.\"<Table>\""`
 
 ## Report
 
-State which stack you touched, the migration name, schema delta, and how you verified fresh + upgrade paths.
+State which context owns the entity, the schema delta added to `db/schema.sql`, and how you verified from a clean database.

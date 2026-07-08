@@ -60,7 +60,7 @@ Update-Database
 
 The solution has two main entry-point applications:
 
-- **`GUI_Simulation`** — Primary app. Anomaly analysis, t-SNE visualization, Random Forest analysis. Entry window: `SimulationPortal.PortalWindow`. Runs migrations for both DBs on startup.
+- **`GUI_Simulation`** — Primary app. Anomaly analysis, t-SNE visualization, Random Forest analysis. Entry window: `SimulationPortal.PortalWindow`. Bootstraps the database (schema + seed) on startup.
 - **`GUI`** — Secondary smart building control UI.
 
 Naming quirks to be aware of:
@@ -68,25 +68,32 @@ Naming quirks to be aware of:
 - Folder `FakeDevices/` contains project **`SimulationObjects`**; folder `FakeDevices.Test/` contains project **`SimulationObjects.Test`**.
 - Domain code mixes Turkish and English names (`Isik` = light, `Oturma Odası` = living room). Match the convention of the file you edit; don't rename existing members.
 
-### Two Separate Database Contexts
+### Database bootstrap (schema.sql, NOT DbMigrator)
 
-Two EF6 stacks target the **same** PostgreSQL database (`adle_sim`), but they are migrated **differently** at startup (`GUI_Simulation/App.xaml.cs` → `RunMigrations`):
+Two EF6 stacks share the **same** PostgreSQL database (`adle_sim`):
 
-- **`DatabaseMigration`** → `DB.cs` — owns `Areas`, `AreaTypes`, `Items`, `Memories`. Applied via `DbMigrator` (real EF6 migrations; upgrade path works on existing DBs).
-- **`SimulationDB_Migrations`** → `DB.cs` — owns `Devices`, `Actors`, `Operations`. Applied via `Database.CreateIfNotExists()` + `Configuration.SeedData(db)` — **schema changes do NOT auto-apply to an existing database**; they require manual `Update-Database` or a recreated DB (`docker-compose down -v`, destroys data).
+- **`DatabaseMigration`** → `DB.cs` — owns `Areas`, `AreaTypes`, `Items`, `Memories`.
+- **`SimulationDB_Migrations`** → `DB.cs` — owns `AreaBases`, `DeviceBases`, `Actors`, `Operations`, and the graph/mapping tables.
+
+**Schema creation does NOT use EF6 migrations at runtime.** The SQL Server → PostgreSQL port left the migration snapshots inconsistent (they encode the `dbo` default schema while the migration bodies create `public.*` tables), so `DbMigrator` throws "automatic migrations that affect the migrations history location are not supported", and Npgsql EF6 can't regenerate the snapshots. Instead:
+
+- **`db/schema.sql`** — a single idempotent DDL script (all 17 tables, `public` schema, `CREATE TABLE IF NOT EXISTS`) is the source of truth for the schema. It ships as an embedded resource (`LogicalName=schema.sql`) in `GUI_Simulation`.
+- `GUI_Simulation/App.xaml.cs` → `InitializeDatabase()` on startup: disables EF6 initializers, ensures the database exists, executes `schema.sql` via a raw `NpgsqlConnection`, then calls `Configuration.SeedData(db)` on **both** contexts.
+- Both `DB.cs` set `modelBuilder.HasDefaultSchema("public")` so EF6 queries target the tables `schema.sql` creates.
+- The EF6 migration files under `*/Migrations/` are kept for history/reference only — **when you change an entity, update `db/schema.sql`**, not the migrations.
 
 Rules:
 
 - Never add an entity or FK that crosses the two stacks; cross-boundary references stay as plain ID columns.
-- Migration failures at startup show a MessageBox warning and the app **continues running** — a half-migrated DB can therefore go unnoticed.
-- Connection strings default to localhost values in each stack's `DB.cs` and can be overridden with the `ADLE_DB_CONNECTION` environment variable. `DataAccess/UnitOfWorkFactory.cs` (legacy SQL Server / MongoDB paths) honors `ADLE_MSSQL_CONNECTION` / `ADLE_MONGO_CONNECTION` — the PostgreSQL path is the live one.
+- DB bootstrap failures at startup show a MessageBox warning and the app **continues running** — an incomplete schema can therefore go unnoticed.
+- Connection strings default to localhost values in each stack's `DB.cs` (`public static ConnStr`) and can be overridden with the `ADLE_DB_CONNECTION` environment variable. `DataAccess/UnitOfWorkFactory.cs` (legacy SQL Server / MongoDB paths) honors `ADLE_MSSQL_CONNECTION` / `ADLE_MONGO_CONNECTION` — the PostgreSQL path is the live one.
 - Npgsql is wired via `DbConfiguration.SetConfiguration(new DatabaseMigration.NpgsqlDbConfiguration())` in `App`'s static constructor.
 
 First run seeds sample data: area types (LivingRoom, Bedroom, Kitchen…), areas (Ev, Oturma Odası…), devices (Lamba, Termostat, Hareket Sensörü, Akıllı Priz at 192.168.1.x), two residents, and morning/noon/evening/night operation routines.
 
 ### IoC / Dependency Injection
 
-A custom IoC container lives in `IoC/Container.cs` (singleton, service-locator pattern). Startup sequence in `GUI_Simulation/App.xaml.cs`: `Container.InitContainer()` → `Container.Register<IGraph, Graph>()`. Types must be registered before anything resolves them — registration order is startup-sequence dependent. Do not introduce Microsoft.Extensions.DependencyInjection.
+A custom IoC container lives in `IoC/Container.cs` (singleton, service-locator pattern). Startup sequence in `GUI_Simulation/App.xaml.cs`: `InitializeDatabase()` → `Container.InitContainer()` → `Container.Register<IGraph, Graph>()`. Types must be registered before anything resolves them — registration order is startup-sequence dependent. Do not introduce Microsoft.Extensions.DependencyInjection.
 
 ### Data Access Layer
 
