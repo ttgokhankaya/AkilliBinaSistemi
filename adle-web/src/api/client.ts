@@ -9,6 +9,10 @@ export type PredictRequest = components['schemas']['PredictRequest']
 export type PredictResponse = components['schemas']['PredictResponse']
 export type TsneRequestDto = components['schemas']['TsneRequestDto']
 export type TsneResponseDto = components['schemas']['TsneResponseDto']
+export type GraphDto = components['schemas']['GraphDto']
+export type GraphWriteDto = components['schemas']['GraphWriteDto']
+export type RunGraphRequest = components['schemas']['RunGraphRequest']
+export type RunGraphResponse = components['schemas']['RunGraphResponse']
 
 const BASE = '/api'
 
@@ -34,4 +38,8 @@ export const api = {
   operations: () => getJson<OperationDto[]>('/operations'),
   predict: (req: PredictRequest) => postJson<PredictRequest, PredictResponse>('/analysis/predict', req),
   tsne: (req: TsneRequestDto) => postJson<TsneRequestDto, TsneResponseDto>('/anomaly/tsne', req),
+  graphs: () => getJson<GraphDto[]>('/graphs'),
+  createGraph: (req: GraphWriteDto) => postJson<GraphWriteDto, GraphDto>('/graphs', req),
+  runGraph: (id: number, req: RunGraphRequest) =>
+    postJson<RunGraphRequest, RunGraphResponse>(`/graphs/${id}/run`, req),
 }

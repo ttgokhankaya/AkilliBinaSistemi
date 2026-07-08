@@ -308,6 +308,11 @@ export interface components {
             useEdgeWeights?: boolean;
             allowLoops?: boolean;
         };
+        RunGraphResponse: {
+            /** Format: int32 */
+            walkCount?: number;
+            walks?: string[][] | null;
+        };
         TrainingSequenceDto: {
             tokens?: string[] | null;
             person?: string | null;
@@ -787,7 +792,9 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": components["schemas"]["RunGraphResponse"];
+                };
             };
         };
     };

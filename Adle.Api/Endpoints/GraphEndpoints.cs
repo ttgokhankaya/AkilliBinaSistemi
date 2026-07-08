@@ -62,7 +62,10 @@ public static class GraphEndpoints
             if (string.IsNullOrWhiteSpace(g.MatrixValue))
                 return Results.BadRequest(new { error = "Graph has no matrix to run." });
 
-            IGraph graph = Graph.CreateNewGraphFromMatrixString(g.MatrixValue, g.Name ?? "");
+            // The AdleGraph matrix parser splits on \r\n; normalize so matrices
+            // stored with plain \n (e.g. edited in a browser textarea) still run.
+            var matrix = g.MatrixValue.Replace("\r\n", "\n").Replace("\n", "\r\n");
+            IGraph graph = Graph.CreateNewGraphFromMatrixString(matrix, g.Name ?? "");
             var start = graph.GetNodeWithName(req.StartNode);
             var end = graph.GetNodeWithName(req.EndNode);
             if (start is null || end is null)
@@ -71,6 +74,7 @@ public static class GraphEndpoints
             var walks = graph.Run(start, end, req.UseEdgeWeights, req.Iterations, req.AllowLoops);
             var mapped = walks.Select(w => w.Select(n => n.Name).ToArray()).ToArray();
             return Results.Ok(new RunGraphResponse(mapped.Length, mapped));
-        }).WithName("RunGraph").WithOpenApi();
+        }).WithName("RunGraph").WithOpenApi()
+          .Produces<RunGraphResponse>(200);
     }
 }
