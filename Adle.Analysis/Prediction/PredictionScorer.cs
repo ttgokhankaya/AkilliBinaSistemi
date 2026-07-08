@@ -29,6 +29,27 @@ namespace Adle.Analysis.Prediction
                 FalsePositive++;
         }
 
+        /// <summary>
+        /// Model-agnostic scoring from a ranked candidate list (best first), so any
+        /// predictor — the thesis LCS pipeline or a baseline — is scored identically.
+        /// </summary>
+        public void Record(System.Collections.Generic.IReadOnlyList<string> rankedNextTokens, string actualNextNode)
+        {
+            if (rankedNextTokens == null || rankedNextTokens.Count == 0 || !Contains(rankedNextTokens, actualNextNode))
+                FalseNegative++;
+            else if (rankedNextTokens[0] == actualNextNode)
+                TruePositive++;
+            else
+                FalsePositive++;
+        }
+
+        private static bool Contains(System.Collections.Generic.IReadOnlyList<string> list, string value)
+        {
+            for (int i = 0; i < list.Count; i++)
+                if (list[i] == value) return true;
+            return false;
+        }
+
         /// <summary>Thesis accuracy: (TP + FP) / N — credit for any in-distribution hit.</summary>
         public double Accuracy => Safe(TruePositive + FalsePositive, Total);
 

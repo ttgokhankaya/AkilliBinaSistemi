@@ -1,70 +1,92 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using Adle.Analysis;
 using Adle.Analysis.Prediction;
+using Adle.Benchmark.Predictors;
 using AdleGraph;
 using AdleGraph.Interfaces;
 
 namespace Adle.Benchmark
 {
-    // Next-step prediction benchmark for the thesis LCS+softmax predictor.
+    // Next-step prediction + label-identification benchmark comparing the thesis
+    // LCS+softmax predictor against baselines on the same train/test split.
     //   dotnet run --project Adle.Benchmark                 -> synthetic (AdleGraph)
     //   dotnet run --project Adle.Benchmark -- casas [path] -> real CASAS data
-    // Default CASAS file: C:\Gokhan\CASAS\labeled\hh101.csv (override via arg or
-    // the ADLE_CASAS_FILE env var). This is the harness the Markov/HMM/LSTM
-    // baseline comparison plugs into.
+    // Default CASAS file: C:\Gokhan\CASAS\labeled\hh101.csv (or ADLE_CASAS_FILE).
     internal static class Program
     {
         private const double TrainRatio = 0.7;
 
         private static void Main(string[] args)
         {
-            if (args.Length > 0 && args[0].Equals("casas", StringComparison.OrdinalIgnoreCase))
+            bool casas = args.Length > 0 && args[0].Equals("casas", StringComparison.OrdinalIgnoreCase);
+
+            List<(string label, List<string> tokens)> data;
+            string labelKind;
+
+            if (casas)
             {
                 string path = args.Length > 1
                     ? args[1]
                     : Environment.GetEnvironmentVariable("ADLE_CASAS_FILE")
                       ?? @"C:\Gokhan\CASAS\labeled\hh101.csv";
-                RunCasas(path);
+                Console.WriteLine("ADLE benchmark — CASAS real data");
+                Console.WriteLine("================================\n");
+                if (!System.IO.File.Exists(path))
+                {
+                    Console.WriteLine($"CASAS file not found: {path}");
+                    Console.WriteLine(@"Pass a path or set ADLE_CASAS_FILE (see C:\Gokhan\CASAS\README.md).");
+                    return;
+                }
+                Console.WriteLine($"file: {path}");
+                var sessions = CasasReader.ReadSessions(path, minLength: 3, maxLength: 40, maxSessions: 600);
+                Console.WriteLine($"labeled activity sessions: {sessions.Count}");
+                Console.WriteLine("top activities: " + string.Join(", ",
+                    sessions.GroupBy(s => s.Activity).OrderByDescending(g => g.Count()).Take(10)
+                            .Select(g => $"{g.Key}({g.Count()})")));
+                data = sessions.Select(s => (s.Activity, s.Tokens)).ToList();
+                labelKind = "Activity";
             }
             else
             {
-                RunSynthetic();
-            }
-        }
-
-        // ---- shared evaluation -------------------------------------------------
-
-        // Each labelled sequence: (label, token list). Trains on a prefix of the
-        // set, then for every test sequence predicts each next token from its
-        // growing prefix and scores next-step + label-identification accuracy.
-        private static void Evaluate(
-            List<(string label, List<string> tokens)> data,
-            string labelKind)
-        {
-            var train = new List<SequenceBarDTO>();
-            var test = new List<(string label, List<string> tokens)>();
-            int order = 0;
-
-            // Stratified split per label so both sides see every label.
-            foreach (var grp in data.GroupBy(d => d.label))
-            {
-                var items = grp.ToList();
-                int split = Math.Max(1, (int)(items.Count * TrainRatio));
-                for (int i = 0; i < items.Count; i++)
-                {
-                    if (i < split)
-                        train.Add(SequenceFactory.ToTrainingBar(items[i].tokens, items[i].label, order++));
-                    else
-                        test.Add(items[i]);
-                }
+                Console.WriteLine("ADLE benchmark — synthetic (AdleGraph)");
+                Console.WriteLine("======================================\n");
+                data = BuildSynthetic();
+                labelKind = "Person";
             }
 
-            Console.WriteLine($"labels: {data.Select(d => d.label).Distinct().Count()}   " +
+            var (train, test) = Split(data);
+            Console.WriteLine($"\nlabels: {data.Select(d => d.label).Distinct().Count()}   " +
                               $"train: {train.Count}   test: {test.Count}\n");
 
-            var service = new PredictionService();
+            var predictors = new ISequencePredictor[]
+            {
+                new LcsSoftmaxPredictor(),
+                new MarkovPredictor(),
+            };
+
+            var rows = new List<Metrics>();
+            foreach (var p in predictors)
+            {
+                p.Train(train);
+                rows.Add(EvaluatePredictor(p, test, labelKind));
+            }
+
+            PrintTable(rows, labelKind);
+        }
+
+        private struct Metrics
+        {
+            public string Model;
+            public double Top1, ThesisAcc, Precision, Recall, F1, LabelAcc;
+            public int N;
+        }
+
+        private static Metrics EvaluatePredictor(
+            ISequencePredictor predictor,
+            List<(string label, List<string> tokens)> test,
+            string labelKind)
+        {
             var scorer = new PredictionScorer();
             int labelPredicted = 0, labelCorrect = 0;
 
@@ -72,97 +94,69 @@ namespace Adle.Benchmark
             {
                 for (int k = 1; k < tokens.Count; k++)
                 {
-                    var prefix = SequenceFactory.FromNodeNames(tokens.Take(k));
-                    var result = service.PredictNextStep(prefix, train);
+                    var prefix = tokens.Take(k).ToList();
+                    scorer.Record(predictor.RankNext(prefix), tokens[k]);
 
-                    scorer.Record(result, tokens[k]);
-
-                    if (!string.IsNullOrEmpty(result.PredictedPerson))
+                    var predLabel = predictor.PredictLabel(prefix);
+                    if (!string.IsNullOrEmpty(predLabel))
                     {
                         labelPredicted++;
-                        if (result.PredictedPerson == label) labelCorrect++;
+                        if (predLabel == label) labelCorrect++;
                     }
                 }
             }
 
-            Console.WriteLine("Next-step prediction");
-            Console.WriteLine($"  predictions (N)     : {scorer.Total}");
-            Console.WriteLine($"  TP / FP / FN        : {scorer.TruePositive} / {scorer.FalsePositive} / {scorer.FalseNegative}");
-            Console.WriteLine($"  accuracy (thesis)   : {scorer.Accuracy:P1}   [(TP+FP)/N]");
-            Console.WriteLine($"  top-1 accuracy      : {scorer.Top1Accuracy:P1}");
-            Console.WriteLine($"  precision           : {scorer.Precision:P1}");
-            Console.WriteLine($"  recall              : {scorer.Recall:P1}");
-            Console.WriteLine($"  F1                  : {scorer.F1:P1}");
-
-            double labelAcc = labelPredicted == 0 ? 0 : (double)labelCorrect / labelPredicted;
-            Console.WriteLine($"\n{labelKind} identification");
-            Console.WriteLine($"  predicted / correct : {labelPredicted} / {labelCorrect}");
-            Console.WriteLine($"  accuracy            : {labelAcc:P1}");
-        }
-
-        // ---- CASAS (real data) -------------------------------------------------
-
-        private static void RunCasas(string path)
-        {
-            Console.WriteLine("ADLE next-step prediction benchmark (CASAS real data)");
-            Console.WriteLine("=====================================================\n");
-            if (!System.IO.File.Exists(path))
+            return new Metrics
             {
-                Console.WriteLine($"CASAS file not found: {path}");
-                Console.WriteLine(@"Pass a path or set ADLE_CASAS_FILE (see C:\Gokhan\CASAS\README.md).");
-                return;
-            }
-
-            Console.WriteLine($"file: {path}");
-            var sessions = CasasReader.ReadSessions(path, minLength: 3, maxLength: 40, maxSessions: 600);
-            Console.WriteLine($"labeled activity sessions: {sessions.Count}");
-
-            var byActivity = sessions.GroupBy(s => s.Activity)
-                                     .OrderByDescending(g => g.Count())
-                                     .Take(12);
-            Console.WriteLine("top activities: " +
-                string.Join(", ", byActivity.Select(g => $"{g.Key}({g.Count()})")) + "\n");
-
-            var data = sessions.Select(s => (s.Activity, s.Tokens)).ToList();
-            Evaluate(data, "Activity");
-        }
-
-        // ---- synthetic (AdleGraph) --------------------------------------------
-
-        private static void RunSynthetic()
-        {
-            Console.WriteLine("ADLE next-step prediction benchmark (synthetic)");
-            Console.WriteLine("================================================\n");
-
-            var people = new[]
-            {
-                ("Baba", BabaGraph()),
-                ("Anne", AnneGraph()),
+                Model = predictor.Name,
+                N = scorer.Total,
+                Top1 = scorer.Top1Accuracy,
+                ThesisAcc = scorer.Accuracy,
+                Precision = scorer.Precision,
+                Recall = scorer.Recall,
+                F1 = scorer.F1,
+                LabelAcc = labelPredicted == 0 ? 0 : (double)labelCorrect / labelPredicted,
             };
-
-            var data = new List<(string, List<string>)>();
-            foreach (var (name, graph) in people)
-            {
-                var walks = Generate(graph, 150);
-                foreach (var w in walks) data.Add((name, w));
-                Console.WriteLine($"{name,-6}: {walks.Count} usable walks");
-            }
-            Console.WriteLine();
-            Evaluate(data, "Person");
         }
 
-        private const string Start = "G";
-        private const string End = "C";
-
-        private static List<List<string>> Generate(IGraph graph, int count)
+        private static void PrintTable(List<Metrics> rows, string labelKind)
         {
-            var start = graph.GetNodeWithName(Start);
-            var end = graph.GetNodeWithName(End);
-            var walks = graph.Run(start, end, useEgdeWeights: true, maxIteration: count, allowLoops: false);
-            return walks
-                .Where(w => w.Count >= 3 && w[w.Count - 1].Name == End)
-                .Select(w => w.Select(n => n.Name).ToList())
-                .ToList();
+            Console.WriteLine($"{"Model",-22} {"top-1",7} {"thesisA",7} {"prec",7} {"recall",7} {"F1",7} {labelKind + "Id",8}");
+            Console.WriteLine(new string('-', 70));
+            foreach (var r in rows)
+                Console.WriteLine($"{r.Model,-22} {r.Top1,7:P1} {r.ThesisAcc,7:P1} {r.Precision,7:P1} {r.Recall,7:P1} {r.F1,7:P1} {r.LabelAcc,8:P1}");
+            Console.WriteLine($"\n(N = {rows.FirstOrDefault().N} next-step predictions on the test split)");
+        }
+
+        private static (List<(string, List<string>)> train, List<(string, List<string>)> test)
+            Split(List<(string label, List<string> tokens)> data)
+        {
+            var train = new List<(string, List<string>)>();
+            var test = new List<(string, List<string>)>();
+            foreach (var grp in data.GroupBy(d => d.label))
+            {
+                var items = grp.ToList();
+                int split = Math.Max(1, (int)(items.Count * TrainRatio));
+                for (int i = 0; i < items.Count; i++)
+                    (i < split ? train : test).Add((items[i].label, items[i].tokens));
+            }
+            return (train, test);
+        }
+
+        // ---- synthetic data (AdleGraph weighted random walks) ------------------
+
+        private static List<(string, List<string>)> BuildSynthetic()
+        {
+            var data = new List<(string, List<string>)>();
+            foreach (var (name, graph) in new[] { ("Baba", BabaGraph()), ("Anne", AnneGraph()) })
+            {
+                var start = graph.GetNodeWithName("G");
+                var end = graph.GetNodeWithName("C");
+                var walks = graph.Run(start, end, useEgdeWeights: true, maxIteration: 150, allowLoops: false);
+                foreach (var w in walks.Where(w => w.Count >= 3 && w[w.Count - 1].Name == "C"))
+                    data.Add((name, w.Select(n => n.Name).ToList()));
+            }
+            return data;
         }
 
         private static IGraph Build(params (string from, string to, double w)[] edges)
