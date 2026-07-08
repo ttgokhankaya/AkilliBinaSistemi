@@ -125,19 +125,8 @@ public static class WriteEndpoints
         }).WithName("DeleteOperation").WithOpenApi();
     }
 
-    /// <summary>Commits and maps DB constraint failures (FK, unique) to 400.</summary>
-    private static async Task<IResult> SaveThen(AdleDbContext db, Func<IResult> onSuccess)
-    {
-        try
-        {
-            await db.SaveChangesAsync();
-            return onSuccess();
-        }
-        catch (DbUpdateException ex)
-        {
-            return Results.BadRequest(new { error = ex.GetBaseException().Message });
-        }
-    }
+    private static Task<IResult> SaveThen(AdleDbContext db, Func<IResult> onSuccess) =>
+        EndpointHelpers.SaveThen(db, onSuccess);
 
     private static AreaDto ToDto(Area a) =>
         new(a.Id, a.Name, a.Width, a.Height, a.AreaId, a.AreaTypeId, a.AreaType?.Name);

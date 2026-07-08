@@ -3,9 +3,17 @@ using Adle.Api.Endpoints;
 using Adle.Api.MlClient;
 using Adle.Analysis.Prediction;
 using Adle.Contracts;
+using AdleGraph;
+using AdleGraph.Interfaces;
+using IoC;
 using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
+
+// AdleGraph's Graph.CreateNewGraphFromMatrixString resolves IGraph through the
+// custom IoC container, so register it at startup (mirrors the WPF App startup).
+Container.InitContainer();
+Container.Register<IGraph, Graph>();
 
 // Add services to the container.
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
@@ -139,5 +147,8 @@ app.MapPost("/api/anomaly/random-forest", async (RandomForestRequestDto req, MlS
 
 // P3 write paths (create/update/delete for areas, devices, operations).
 app.MapWriteEndpoints();
+
+// P3 graph build + run.
+app.MapGraphEndpoints();
 
 app.Run();
