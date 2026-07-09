@@ -2,9 +2,9 @@ name: CI
 
 on:
   push:
-    branches: [master]
+    branches: [master, web]
   pull_request:
-    branches: [master]
+    branches: [master, web]
 
 jobs:
   dotnet:
@@ -46,3 +46,43 @@ jobs:
 
       - name: Docker build
         run: docker build -t adle-ml-service ./ml_service
+
+  web:
+    name: Web (API + React)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup .NET 8
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 8.0.x
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+          cache-dependency-path: adle-web/package-lock.json
+
+      # Build via csproj (not the .slnx solution — that format needs the .NET 9+
+      # SDK). The web projects are pure net8.0 (no WPF), so they build on Linux;
+      # building the test project compiles the API and all its dependencies too.
+      - name: Build .NET web projects
+        run: |
+          dotnet restore Adle.Api/Adle.Api.csproj
+          dotnet build Adle.Api/Adle.Api.csproj --no-restore --configuration Release
+          dotnet build Adle.Api.Test/Adle.Api.Test.csproj --configuration Release
+
+      - name: Build React frontend
+        working-directory: adle-web
+        run: |
+          npm ci
+          npm run build
+
+      # NOTE: Adle.Api.Test is a DB-backed HTTP integration suite that expects
+      # seeded data; running it in CI needs a Postgres service + seed fixture.
+      # Deferred — see docs/WEB.md.
+
+      - name: Docker build (API image)
+        run: docker build -f Adle.Api/Dockerfile -t adle-api .
