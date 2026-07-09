@@ -9,12 +9,31 @@ services:
       - "5432:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
+      # Create the schema on first init (empty data dir). Seed data is written
+      # by the desktop app / via the API write endpoints.
+      - ./db/schema.sql:/docker-entrypoint-initdb.d/schema.sql:ro
     restart: unless-stopped
 
   ml_service:
     build: ./ml_service
     ports:
       - "8000:8000"
+    restart: unless-stopped
+
+  # Web API + bundled React SPA (single origin). Build from the repo root so the
+  # API can reference its sibling net8.0 projects.
+  adle_api:
+    build:
+      context: .
+      dockerfile: Adle.Api/Dockerfile
+    ports:
+      - "5080:8080"
+    environment:
+      ADLE_DB_CONNECTION: "Host=postgres;Port=5432;Database=adle_sim;Username=adle_user;Password=Password1"
+      ML_SERVICE_URL: "http://ml_service:8000/"
+    depends_on:
+      - postgres
+      - ml_service
     restart: unless-stopped
 
 volumes:
