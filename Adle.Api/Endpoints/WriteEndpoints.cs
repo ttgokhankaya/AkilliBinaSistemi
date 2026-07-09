@@ -31,7 +31,11 @@ public static class WriteEndpoints
                 AreaTypeId = dto.AreaTypeId,
             };
             db.Areas.Add(area);
-            return await SaveThen(db, () => Results.Created($"/api/areas/{area.Id}", ToDto(area)));
+            return await SaveThen(db, async () =>
+            {
+                await LoadAreaTypeAsync(db, area);
+                return Results.Created($"/api/areas/{area.Id}", ToDto(area));
+            });
         }).WithName("CreateArea").WithOpenApi();
 
         app.MapPut("/api/areas/{id:int}", async (int id, AreaWriteDto dto, AdleDbContext db) =>
@@ -43,7 +47,11 @@ public static class WriteEndpoints
             area.Height = dto.Height;
             area.AreaId = dto.ParentAreaId;
             area.AreaTypeId = dto.AreaTypeId;
-            return await SaveThen(db, () => Results.Ok(ToDto(area)));
+            return await SaveThen(db, async () =>
+            {
+                await LoadAreaTypeAsync(db, area);
+                return Results.Ok(ToDto(area));
+            });
         }).WithName("UpdateArea").WithOpenApi();
 
         app.MapDelete("/api/areas/{id:int}", async (int id, AdleDbContext db) =>
@@ -68,7 +76,11 @@ public static class WriteEndpoints
                 AreaId = dto.AreaId,
             };
             db.DeviceBases.Add(device);
-            return await SaveThen(db, () => Results.Created($"/api/devices/{device.Id}", ToDto(device)));
+            return await SaveThen(db, async () =>
+            {
+                await LoadDeviceAreaAsync(db, device);
+                return Results.Created($"/api/devices/{device.Id}", ToDto(device));
+            });
         }).WithName("CreateDevice").WithOpenApi();
 
         app.MapPut("/api/devices/{id:int}", async (int id, DeviceWriteDto dto, AdleDbContext db) =>
@@ -80,7 +92,11 @@ public static class WriteEndpoints
             device.State = dto.State;
             device.Discriminator = dto.Kind;
             device.AreaId = dto.AreaId;
-            return await SaveThen(db, () => Results.Ok(ToDto(device)));
+            return await SaveThen(db, async () =>
+            {
+                await LoadDeviceAreaAsync(db, device);
+                return Results.Ok(ToDto(device));
+            });
         }).WithName("UpdateDevice").WithOpenApi();
 
         app.MapDelete("/api/devices/{id:int}", async (int id, AdleDbContext db) =>
@@ -127,6 +143,20 @@ public static class WriteEndpoints
 
     private static Task<IResult> SaveThen(AdleDbContext db, Func<IResult> onSuccess) =>
         EndpointHelpers.SaveThen(db, onSuccess);
+
+    private static Task<IResult> SaveThen(AdleDbContext db, Func<Task<IResult>> onSuccess) =>
+        EndpointHelpers.SaveThen(db, onSuccess);
+
+    // Load the joined name so create/update responses carry it (the nav isn't
+    // populated after a bare insert/update).
+    private static async Task LoadAreaTypeAsync(AdleDbContext db, Area area)
+    {
+        if (area.AreaTypeId is not null)
+            await db.Entry(area).Reference(a => a.AreaType).LoadAsync();
+    }
+
+    private static Task LoadDeviceAreaAsync(AdleDbContext db, DeviceBasis device) =>
+        db.Entry(device).Reference(d => d.Area).LoadAsync();
 
     private static AreaDto ToDto(Area a) =>
         new(a.Id, a.Name, a.Width, a.Height, a.AreaId, a.AreaTypeId, a.AreaType?.Name);

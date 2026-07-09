@@ -59,6 +59,11 @@ if (app.Environment.IsDevelopment())
 
 app.UseHttpsRedirection();
 
+// Serve the built React SPA (adle-web build output lands in wwwroot). In dev
+// this is empty and the Vite dev server proxies /api instead.
+app.UseDefaultFiles();
+app.UseStaticFiles();
+
 // P0 spike endpoint: proves core reuse + DB path end to end.
 app.MapGet("/api/areas", async (AdleDbContext db) =>
     await db.Areas
@@ -150,5 +155,9 @@ app.MapWriteEndpoints();
 
 // P3 graph build + run.
 app.MapGraphEndpoints();
+
+// SPA client-side routing fallback (serves index.html for non-API GETs when a
+// build is present). Harmless in dev when wwwroot has no index.html.
+app.MapFallbackToFile("index.html");
 
 app.Run();

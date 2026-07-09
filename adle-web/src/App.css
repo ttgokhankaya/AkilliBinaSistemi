@@ -161,3 +161,50 @@ nav button {
   font-size: 1.1rem;
   font-weight: 600;
 }
+
+button.secondary {
+  background: transparent;
+  color: inherit;
+  border-color: #8888;
+}
+
+.actions {
+  white-space: nowrap;
+}
+
+button.link {
+  background: none;
+  border: none;
+  color: #4f80ff;
+  padding: 0.2rem 0.4rem;
+  font-size: 0.82rem;
+  cursor: pointer;
+}
+
+button.link.danger {
+  color: #d33;
+}
+
+label.check {
+  flex-direction: row;
+  align-items: center;
+  gap: 0.4rem;
+}
+
+label.check input {
+  width: auto;
+}
+
+h3 {
+  font-size: 1rem;
+  margin: 1.25rem 0 0.5rem;
+}
+
+select {
+  font-size: 0.9rem;
+  padding: 0.4rem 0.5rem;
+  border: 1px solid #8886;
+  border-radius: 4px;
+  background: transparent;
+  color: inherit;
+}

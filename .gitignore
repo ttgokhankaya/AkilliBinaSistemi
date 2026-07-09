@@ -40,3 +40,6 @@ _ReSharper*/
 *.DotSettings.user
 .claude/settings.local.json
 docker-compose.override.yml
+
+# Web API static SPA build output (produced by adle-web build)
+Adle.Api/wwwroot/
