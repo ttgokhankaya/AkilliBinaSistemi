@@ -102,10 +102,11 @@ jobs:
       - name: Integration tests (Adle.Api.Test)
         run: dotnet test Adle.Api.Test/Adle.Api.Test.csproj --no-build --configuration Release
 
-      - name: Build React frontend
+      - name: Build & test React frontend
         working-directory: adle-web
         run: |
           npm ci
+          npm run test
           npm run build
 
       - name: Docker build (API image)

@@ -98,11 +98,19 @@ bundle ~194 kB).
 ## Tests
 
 ```bash
-dotnet test Adle.Api.Test/Adle.Api.Test.csproj    # HTTP integration tests
+dotnet test Adle.Api.Test/Adle.Api.Test.csproj    # API HTTP integration tests
+cd adle-web && npm run test                        # React component tests (Vitest)
 ```
 
-Requires the PostgreSQL infra to be up (the DB is real; `ml_service` is stubbed
-in-process). They run serially (`[assembly: DoNotParallelize]`) — see below.
+- **API** (`Adle.Api.Test`): HTTP tests over `WebApplicationFactory`. The DB is
+  real (needs the PostgreSQL infra up); `ml_service` is stubbed in-process. They
+  run serially (`[assembly: DoNotParallelize]`) — see the concurrency note below.
+- **Frontend** (Vitest + Testing Library): component tests mock the API client
+  and stub Plotly, so they need neither a backend nor a browser.
+
+CI (`.github/workflows/ci.yml`, `web` job) runs both: it spins up a Postgres
+service, loads `db/schema.sql` + `db/seed-ci.sql`, runs the API suite, then the
+frontend tests + build + Docker image build.
 
 ## Known limitations
 
