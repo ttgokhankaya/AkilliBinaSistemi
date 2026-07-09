@@ -6,6 +6,8 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 **Akilli Bina Sistemi (ADLE)** — Activity Driven Life Environments. A C# .NET 8 WPF smart building simulation platform with a Python ML microservice. The app simulates resident behavior, device automation, and anomaly detection in smart homes.
 
+> **Web variant (this `web` branch):** a parallel ASP.NET Core 8 API (`Adle.Api`) + React/Vite frontend (`adle-web`) that reuses the same `Adle.Analysis` / `AdleGraph` core and `ml_service` over HTTP. Solution: `Adle.Web.slnx`. See [`docs/WEB.md`](docs/WEB.md) for how to run it, the API surface, and known limitations. `master` stays the desktop + core + benchmark track; core changes flow `master → web` via merge.
+
 ## Prerequisites & Quick Start
 
 - Docker Desktop, Visual Studio 2022+, .NET 8 SDK
