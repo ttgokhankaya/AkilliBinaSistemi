@@ -9,6 +9,8 @@ export type PredictRequest = components['schemas']['PredictRequest']
 export type PredictResponse = components['schemas']['PredictResponse']
 export type TsneRequestDto = components['schemas']['TsneRequestDto']
 export type TsneResponseDto = components['schemas']['TsneResponseDto']
+export type RandomForestRequestDto = components['schemas']['RandomForestRequestDto']
+export type RandomForestResponseDto = components['schemas']['RandomForestResponseDto']
 export type GraphDto = components['schemas']['GraphDto']
 export type GraphWriteDto = components['schemas']['GraphWriteDto']
 export type RunGraphRequest = components['schemas']['RunGraphRequest']
@@ -67,6 +69,8 @@ export const api = {
 
   predict: (req: PredictRequest) => postJson<PredictRequest, PredictResponse>('/analysis/predict', req),
   tsne: (req: TsneRequestDto) => postJson<TsneRequestDto, TsneResponseDto>('/anomaly/tsne', req),
+  randomForest: (req: RandomForestRequestDto) =>
+    postJson<RandomForestRequestDto, RandomForestResponseDto>('/anomaly/random-forest', req),
   graphs: () => getJson<GraphDto[]>('/graphs'),
   createGraph: (req: GraphWriteDto) => postJson<GraphWriteDto, GraphDto>('/graphs', req),
   runGraph: (id: number, req: RunGraphRequest) =>

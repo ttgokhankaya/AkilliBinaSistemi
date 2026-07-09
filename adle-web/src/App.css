@@ -208,3 +208,18 @@ select {
   background: transparent;
   color: inherit;
 }
+
+h4 {
+  font-size: 0.9rem;
+  margin: 1rem 0 0.4rem;
+}
+
+pre.tree {
+  font-family: ui-monospace, Consolas, monospace;
+  font-size: 0.8rem;
+  background: #8881;
+  padding: 0.75rem;
+  border-radius: 6px;
+  overflow-x: auto;
+  max-height: 320px;
+}
