@@ -1,5 +1,6 @@
 <Solution>
   <Project Path="Adle.Analysis/Adle.Analysis.csproj" />
+  <Project Path="Adle.Api.Test/Adle.Api.Test.csproj" />
   <Project Path="Adle.Api/Adle.Api.csproj" />
   <Project Path="Adle.Contracts/Adle.Contracts.csproj" />
   <Project Path="AdleGraph/AdleGraph.csproj" />
