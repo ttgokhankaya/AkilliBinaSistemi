@@ -50,6 +50,22 @@ jobs:
   web:
     name: Web (API + React)
     runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:15
+        env:
+          POSTGRES_DB: adle_sim
+          POSTGRES_USER: adle_user
+          POSTGRES_PASSWORD: Password1
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U adle_user -d adle_sim"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+    env:
+      ADLE_DB_CONNECTION: "Host=localhost;Port=5432;Database=adle_sim;Username=adle_user;Password=Password1"
     steps:
       - uses: actions/checkout@v4
 
@@ -74,15 +90,23 @@ jobs:
           dotnet build Adle.Api/Adle.Api.csproj --no-restore --configuration Release
           dotnet build Adle.Api.Test/Adle.Api.Test.csproj --configuration Release
 
+      # Create the schema + a minimal fixture the integration tests expect.
+      - name: Load schema + seed
+        env:
+          PGPASSWORD: Password1
+        run: |
+          psql -h localhost -U adle_user -d adle_sim -v ON_ERROR_STOP=1 -f db/schema.sql
+          psql -h localhost -U adle_user -d adle_sim -v ON_ERROR_STOP=1 -f db/seed-ci.sql
+
+      # DB-backed HTTP integration suite (ml_service is stubbed in-process).
+      - name: Integration tests (Adle.Api.Test)
+        run: dotnet test Adle.Api.Test/Adle.Api.Test.csproj --no-build --configuration Release
+
       - name: Build React frontend
         working-directory: adle-web
         run: |
           npm ci
           npm run build
-
-      # NOTE: Adle.Api.Test is a DB-backed HTTP integration suite that expects
-      # seeded data; running it in CI needs a Postgres service + seed fixture.
-      # Deferred — see docs/WEB.md.
 
       - name: Docker build (API image)
         run: docker build -f Adle.Api/Dockerfile -t adle-api .
