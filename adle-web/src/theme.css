@@ -1,0 +1,299 @@
+/*
+ * ADLE design-system tokens + app shell.
+ * Ported from the "ADLE Anomaly.dc.html" design handoff (claude.ai/design).
+ * Tokens live on the [data-theme] root so every page can read var(--*) and
+ * both themes share one source of truth. Plotly charts read the matching
+ * palette from JS (see PLOT in AnomalyPage.tsx) since SVG can't use CSS vars.
+ */
+
+:root {
+  color-scheme: light dark;
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+[data-theme='light'] {
+  --bg: #f4f6f9;
+  --surface: #ffffff;
+  --surface-2: #eef1f5;
+  --surface-3: #e6eaf0;
+  --border: #e2e6ec;
+  --border-strong: #cbd2dd;
+  --text: #161b24;
+  --text-2: #525b6b;
+  --text-3: #8b95a5;
+  --accent: #3b5bdb;
+  --accent-hover: #2f49b8;
+  --accent-weak: #eaeefc;
+  --on-accent: #ffffff;
+  --success: #158f52;
+  --success-weak: #e4f5ec;
+  --warn: #a6690f;
+  --warn-weak: #faf0dd;
+  --danger: #cf3b48;
+  --danger-weak: #fbe8ea;
+  --info: #2f6fd0;
+  --info-weak: #e7f0fb;
+  --ring: rgba(59, 91, 219, 0.32);
+  --shadow: 0 1px 2px rgba(20, 28, 46, 0.06), 0 2px 6px rgba(20, 28, 46, 0.05);
+  --shadow-lg: 0 12px 40px rgba(20, 28, 46, 0.16);
+  --skel: linear-gradient(90deg, #e6eaf0 25%, #eef1f5 37%, #e6eaf0 63%);
+}
+
+[data-theme='dark'] {
+  --bg: #0e131c;
+  --surface: #161c28;
+  --surface-2: #1c2432;
+  --surface-3: #232c3c;
+  --border: #2a3342;
+  --border-strong: #3a4557;
+  --text: #e7ebf2;
+  --text-2: #9aa5b6;
+  --text-3: #697488;
+  --accent: #5b7cfa;
+  --accent-hover: #7089ff;
+  --accent-weak: #1b2540;
+  --on-accent: #ffffff;
+  --success: #37c47f;
+  --success-weak: #122a20;
+  --warn: #e0a53a;
+  --warn-weak: #2c2415;
+  --danger: #f16d76;
+  --danger-weak: #301a1d;
+  --info: #5aa2ff;
+  --info-weak: #122236;
+  --ring: rgba(91, 124, 250, 0.4);
+  --shadow: 0 1px 2px rgba(0, 0, 0, 0.4), 0 2px 8px rgba(0, 0, 0, 0.35);
+  --shadow-lg: 0 14px 46px rgba(0, 0, 0, 0.6);
+  --skel: linear-gradient(90deg, #1c2432 25%, #232c3c 37%, #1c2432 63%);
+}
+
+@keyframes adle-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+@keyframes adle-toast {
+  from {
+    transform: translate(-50%, 14px);
+    opacity: 0;
+  }
+  to {
+    transform: translate(-50%, 0);
+    opacity: 1;
+  }
+}
+@keyframes adle-fade {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+@keyframes adle-shimmer {
+  0% {
+    background-position: 100% 0;
+  }
+  100% {
+    background-position: -100% 0;
+  }
+}
+@keyframes adle-pop {
+  from {
+    transform: translateY(10px) scale(0.98);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0) scale(1);
+    opacity: 1;
+  }
+}
+
+::selection {
+  background: var(--accent);
+  color: #fff;
+}
+
+/* Range slider — reset the app's generic input styling and theme the track/thumb. */
+input[type='range'] {
+  -webkit-appearance: none;
+  appearance: none;
+  height: 5px;
+  padding: 0;
+  margin: 0;
+  border: none;
+  border-radius: 5px;
+  background: var(--surface-3);
+  outline: none;
+}
+input[type='range']::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 17px;
+  height: 17px;
+  border-radius: 50%;
+  background: var(--accent);
+  cursor: pointer;
+  border: 2px solid var(--surface);
+  box-shadow: var(--shadow);
+}
+input[type='range']::-moz-range-thumb {
+  width: 15px;
+  height: 15px;
+  border-radius: 50%;
+  background: var(--accent);
+  cursor: pointer;
+  border: 2px solid var(--surface);
+}
+
+/* ---------- App shell ---------- */
+
+.adle-root {
+  min-height: 100vh;
+  background: var(--bg);
+  color: var(--text);
+  transition: background 0.2s, color 0.2s;
+  font-family: system-ui, -apple-system, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+}
+
+.adle-header {
+  position: sticky;
+  top: 0;
+  z-index: 20;
+  display: flex;
+  align-items: center;
+  gap: 18px;
+  height: 60px;
+  padding: 0 24px;
+  background: color-mix(in srgb, var(--surface) 82%, transparent);
+  backdrop-filter: blur(10px);
+  border-bottom: 1px solid var(--border);
+}
+
+.adle-brand {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex: none;
+  border: none;
+  background: none;
+  padding: 0;
+  font: inherit;
+  color: inherit;
+  cursor: pointer;
+}
+.adle-logo {
+  width: 30px;
+  height: 30px;
+  border-radius: 9px;
+  background: var(--accent);
+  display: grid;
+  place-items: center;
+  box-shadow: var(--shadow);
+}
+.adle-wordmark {
+  font-weight: 800;
+  font-size: 17px;
+  letter-spacing: -0.02em;
+  color: var(--text);
+}
+
+.adle-nav {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  margin-left: 8px;
+  flex-wrap: wrap;
+}
+.adle-nav-div {
+  width: 1px;
+  height: 20px;
+  background: var(--border);
+  margin: 0 6px;
+}
+.adle-navlink {
+  display: inline-flex;
+  align-items: center;
+  height: 34px;
+  padding: 0 12px;
+  border: none;
+  border-radius: 8px;
+  background: transparent;
+  color: var(--text-2);
+  font: 600 13px system-ui;
+  cursor: pointer;
+  transition: background 0.12s, color 0.12s;
+}
+.adle-navlink:hover {
+  background: var(--surface-2);
+  color: var(--text);
+}
+.adle-navlink.active {
+  background: var(--accent-weak);
+  color: var(--accent);
+}
+
+.adle-toggle {
+  margin-left: auto;
+  flex: none;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  height: 36px;
+  padding: 0 12px;
+  border-radius: 9px;
+  border: 1px solid var(--border-strong);
+  background: var(--surface);
+  color: var(--text-2);
+  font: 600 12.5px system-ui;
+  cursor: pointer;
+  transition: background 0.12s, color 0.12s;
+}
+.adle-toggle:hover {
+  background: var(--surface-2);
+  color: var(--text);
+}
+.adle-toggle svg {
+  display: block;
+}
+
+.adle-main {
+  max-width: 1180px;
+  margin: 0 auto;
+  padding: 28px 24px 80px;
+}
+
+/* Two-column control/result layout shared by the analysis panels. Kept here
+   (not in the page CSS) so the responsive collapse wins without !important. */
+.adle-stack {
+  display: grid;
+  grid-template-columns: 260px minmax(0, 1fr);
+  gap: 0;
+}
+.adle-ctl {
+  border-right: 1px solid var(--border);
+}
+.a-rf-stack {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  gap: 16px;
+  align-items: start;
+}
+
+@media (max-width: 900px) {
+  .adle-stack {
+    grid-template-columns: 1fr;
+  }
+  .adle-ctl {
+    border-right: none;
+    border-bottom: 1px solid var(--border);
+  }
+  .a-rf-stack {
+    grid-template-columns: 1fr;
+  }
+}

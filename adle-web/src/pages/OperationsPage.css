@@ -1,0 +1,165 @@
+/* Operations page — ported from "ADLE Operations.dc.html". Reuses the shared
+   ui-* component library (page head, buttons, table, form fields, confirm
+   modal, toast) and adds two page-specific pieces the design system doesn't
+   cover: the 24-hour daily-schedule timeline and the create/edit form modal. */
+
+/* Header row: title block + "New routine" action */
+.op-head-row {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 20px;
+  flex-wrap: wrap;
+  margin-bottom: 22px;
+}
+
+/* Section card (timeline + table share this shell) */
+.op-section {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 15px;
+  box-shadow: var(--shadow);
+  overflow: hidden;
+  margin-bottom: 18px;
+}
+.op-section:last-child {
+  margin-bottom: 0;
+}
+.op-section-head {
+  padding: 14px 18px;
+  border-bottom: 1px solid var(--border);
+  font: 700 13.5px system-ui;
+}
+
+/* ---------- 24-hour timeline ---------- */
+.op-timeline-body {
+  padding: 22px 22px 16px;
+}
+.op-track {
+  position: relative;
+  height: 56px;
+}
+.op-gridline {
+  position: absolute;
+  top: 0;
+  bottom: 16px;
+  width: 1px;
+  background: var(--border);
+}
+.op-track-base {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 22px;
+  height: 12px;
+  border-radius: 6px;
+  background: var(--surface-2);
+}
+.op-bar {
+  position: absolute;
+  top: 18px;
+  height: 20px;
+  border-radius: 6px;
+  display: flex;
+  align-items: center;
+  padding: 0 8px;
+  overflow: hidden;
+  transition: transform 0.12s, box-shadow 0.12s;
+  z-index: 2;
+}
+.op-bar.hovered {
+  transform: scaleY(1.18);
+  box-shadow: var(--shadow-lg);
+  z-index: 3;
+}
+.op-bar-label {
+  font: 700 10.5px system-ui;
+  color: #fff;
+  white-space: nowrap;
+  text-shadow: 0 1px 1px rgba(0, 0, 0, 0.25);
+}
+.op-axis {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 10px;
+  font: 600 10px ui-monospace, Consolas, monospace;
+  color: var(--text-3);
+}
+.op-timeline-empty {
+  display: grid;
+  place-items: center;
+  height: 56px;
+  font: 500 12.5px system-ui;
+  color: var(--text-3);
+}
+
+/* ---------- Table extras (rows carry a coloured routine dot) ---------- */
+.op-row.hovered {
+  background: var(--surface-2);
+}
+.op-name-cell {
+  display: inline-flex;
+  align-items: center;
+  gap: 9px;
+  font-weight: 600;
+}
+.op-dot {
+  width: 9px;
+  height: 9px;
+  border-radius: 3px;
+  flex: none;
+}
+
+/* ---------- Create / edit form modal ---------- */
+.op-form-modal {
+  width: 100%;
+  max-width: 440px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  box-shadow: var(--shadow-lg);
+  animation: adle-pop 0.16s ease-out;
+  overflow: hidden;
+}
+.op-form-head {
+  padding: 18px 22px;
+  border-bottom: 1px solid var(--border);
+  font: 800 16px system-ui;
+}
+.op-form-body {
+  padding: 22px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+.op-dur-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.op-dur-unit {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.op-dur-num {
+  width: 66px;
+  text-align: left;
+}
+.op-dur-suffix {
+  font: 600 12.5px system-ui;
+  color: var(--text-2);
+}
+.op-dur-secs {
+  margin-left: auto;
+  font: 500 11.5px ui-monospace, Consolas, monospace;
+  color: var(--text-3);
+}
+.op-form-foot {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  padding: 16px 22px;
+  border-top: 1px solid var(--border);
+  background: var(--surface-2);
+}

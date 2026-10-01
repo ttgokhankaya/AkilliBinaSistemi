@@ -73,6 +73,8 @@ export const api = {
     postJson<RandomForestRequestDto, RandomForestResponseDto>('/anomaly/random-forest', req),
   graphs: () => getJson<GraphDto[]>('/graphs'),
   createGraph: (req: GraphWriteDto) => postJson<GraphWriteDto, GraphDto>('/graphs', req),
+  updateGraph: (id: number, req: GraphWriteDto) => putJson<GraphWriteDto, GraphDto>(`/graphs/${id}`, req),
+  deleteGraph: (id: number) => del(`/graphs/${id}`),
   runGraph: (id: number, req: RunGraphRequest) =>
     postJson<RunGraphRequest, RunGraphResponse>(`/graphs/${id}/run`, req),
 }

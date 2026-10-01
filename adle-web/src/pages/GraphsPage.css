@@ -1,0 +1,420 @@
+/* Graphs page — ported from "ADLE Graphs.dc.html". A saved adjacency-matrix
+   (TSV) editor + a topology preview + a random-walk runner, wired to the real
+   /api/graphs endpoints. Shared primitives live in ui.css; this file only adds
+   the layout and the few widgets the design brief doesn't cover generically. */
+
+/* ---------- Page header: title + graph selector / new toolbar ---------- */
+.g-head {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 20px;
+  flex-wrap: wrap;
+  margin-bottom: 22px;
+}
+.g-head-actions {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+/* Graph picker (segmented list of saved graphs) */
+.g-picker {
+  display: flex;
+  gap: 4px;
+  padding: 4px;
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  border-radius: 11px;
+  flex-wrap: wrap;
+  max-width: 460px;
+}
+.g-picker-btn {
+  height: 30px;
+  padding: 0 12px;
+  border-radius: 8px;
+  border: none;
+  cursor: pointer;
+  font: 600 12px system-ui;
+  background: transparent;
+  color: var(--text-2);
+  transition: background 0.12s, color 0.12s;
+  white-space: nowrap;
+}
+.g-picker-btn:hover {
+  color: var(--text);
+}
+.g-picker-btn.active {
+  background: var(--surface);
+  color: var(--text);
+  box-shadow: var(--shadow);
+}
+.g-picker-empty {
+  padding: 0 10px;
+  font: 500 12px system-ui;
+  color: var(--text-3);
+  align-self: center;
+}
+
+/* ---------- 3-column workspace ---------- */
+.g-stack {
+  display: grid;
+  grid-template-columns: minmax(0, 1.15fr) minmax(0, 1fr) minmax(260px, 0.85fr);
+  gap: 18px;
+  align-items: start;
+}
+@media (max-width: 980px) {
+  .g-stack {
+    grid-template-columns: 1fr;
+  }
+  .g-run {
+    position: static !important;
+  }
+}
+
+/* Panel shell shared by the three workspace cards */
+.g-panel {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 15px;
+  box-shadow: var(--shadow);
+  overflow: hidden;
+}
+.g-panel-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 13px 16px;
+  border-bottom: 1px solid var(--border);
+}
+.g-panel-title {
+  font: 700 13px system-ui;
+}
+.g-panel-sub {
+  font: 500 11px system-ui;
+  color: var(--text-3);
+  margin-top: 1px;
+}
+.g-tsv-tag {
+  font: 600 10.5px ui-monospace, Consolas, monospace;
+  color: var(--text-3);
+  background: var(--surface-2);
+  padding: 4px 8px;
+  border-radius: 6px;
+  border: 1px solid var(--border);
+}
+
+/* ---------- Matrix editor ---------- */
+.g-matrix-body {
+  padding: 14px;
+  overflow-x: auto;
+}
+.g-matrix {
+  border-collapse: collapse;
+  font-family: ui-monospace, Consolas, monospace;
+}
+.g-matrix th.g-corner {
+  position: sticky;
+  left: 0;
+  background: var(--surface);
+  padding: 6px;
+  font: 700 10px ui-monospace, Consolas, monospace;
+  color: var(--text-3);
+  text-align: left;
+  min-width: 80px;
+}
+.g-matrix th.g-colhead {
+  padding: 6px 4px;
+  font: 700 10.5px ui-monospace, Consolas, monospace;
+  color: var(--text-2);
+  text-align: center;
+  min-width: 46px;
+  white-space: nowrap;
+}
+.g-matrix th.g-rowhead {
+  position: sticky;
+  left: 0;
+  background: var(--surface);
+  padding: 6px;
+  font: 700 11px system-ui;
+  color: var(--text);
+  text-align: left;
+  white-space: nowrap;
+}
+.g-matrix td {
+  padding: 2px;
+}
+.g-cell {
+  width: 46px;
+  height: 32px;
+  text-align: center;
+  border-radius: 7px;
+  border: 1px solid var(--border);
+  background: var(--surface-2);
+  color: var(--text-3);
+  font: 600 12.5px ui-monospace, Consolas, monospace;
+  outline: none;
+}
+.g-cell.set {
+  border-color: var(--border-strong);
+  background: var(--accent-weak);
+  color: var(--text);
+}
+.g-cell.diag {
+  opacity: 0.55;
+}
+.g-cell:focus {
+  border-color: var(--accent);
+  background: var(--surface);
+  box-shadow: 0 0 0 2px var(--ring);
+}
+/* Editable node header (rename + remove) */
+.g-node-edit {
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+  justify-content: center;
+}
+.g-node-name {
+  width: 44px;
+  height: 24px;
+  text-align: center;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  background: var(--surface);
+  color: var(--text);
+  font: 700 11px ui-monospace, Consolas, monospace;
+  outline: none;
+}
+.g-node-name:focus {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 2px var(--ring);
+}
+.g-node-x {
+  width: 15px;
+  height: 15px;
+  padding: 0;
+  border: none;
+  border-radius: 4px;
+  background: none;
+  color: var(--text-3);
+  cursor: pointer;
+  font-size: 14px;
+  line-height: 1;
+}
+.g-node-x:hover {
+  color: var(--danger);
+  background: var(--danger-weak);
+}
+
+/* Add-node control + note row under the grid */
+.g-matrix-foot {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  flex-wrap: wrap;
+  margin-top: 12px;
+}
+.g-matrix-note {
+  flex: 1;
+  min-width: 180px;
+  margin: 0;
+  font: 500 11.5px/1.5 system-ui;
+  color: var(--text-3);
+}
+
+/* Matrix parse error / empty fallback */
+.g-matrix-fallback {
+  padding: 16px;
+}
+.g-raw {
+  white-space: pre;
+  overflow-x: auto;
+}
+
+/* ---------- Topology preview ---------- */
+.g-preview-legend {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  font: 600 10.5px system-ui;
+  color: var(--text-3);
+}
+.g-legend-item {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+}
+.g-legend-dot {
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+}
+.g-preview-body {
+  padding: 8px;
+}
+.g-preview-svg {
+  width: 100%;
+  height: auto;
+  display: block;
+}
+
+/* ---------- Run panel ---------- */
+.g-run {
+  position: sticky;
+  top: 76px;
+}
+.g-run-body {
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+.g-run-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+.g-toggles {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  border-top: 1px solid var(--border);
+  padding-top: 12px;
+}
+.g-toggle {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  background: none;
+  border: none;
+  padding: 7px 0;
+  cursor: pointer;
+  text-align: left;
+}
+.g-toggle-title {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font: 600 12.5px system-ui;
+  color: var(--text);
+}
+.g-toggle-sub {
+  display: block;
+  font: 500 11px system-ui;
+  color: var(--text-3);
+  margin-top: 1px;
+}
+.g-run-btn {
+  height: 42px;
+  border-radius: 10px;
+  font: 700 14px system-ui;
+  width: 100%;
+}
+
+/* ---------- Results ---------- */
+.g-results {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 15px;
+  box-shadow: var(--shadow);
+  overflow: hidden;
+  margin-top: 18px;
+  position: relative;
+}
+.g-results-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 14px 18px;
+  border-bottom: 1px solid var(--border);
+}
+.g-results-title {
+  font: 700 14px system-ui;
+}
+.g-results-note {
+  font: 500 12px system-ui;
+  color: var(--text-3);
+}
+.g-stats {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+  gap: 1px;
+  background: var(--border);
+}
+.g-stat {
+  background: var(--surface);
+  padding: 16px 18px;
+}
+.g-stat-k {
+  font: 700 10.5px ui-monospace, Consolas, monospace;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--text-3);
+}
+.g-stat-v {
+  font: 800 26px system-ui;
+  margin-top: 4px;
+}
+.g-stat-v.ok {
+  color: var(--success);
+}
+.g-walks {
+  max-height: 340px;
+  overflow-y: auto;
+  padding: 6px 0;
+}
+.g-walk {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 18px;
+  transition: background 0.1s;
+}
+.g-walk:hover {
+  background: var(--surface-2);
+}
+.g-walk-idx {
+  flex: none;
+  width: 34px;
+  font: 600 11px ui-monospace, Consolas, monospace;
+  color: var(--text-3);
+}
+.g-walk-steps {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  flex-wrap: wrap;
+}
+.g-chip {
+  display: inline-flex;
+  align-items: center;
+  height: 22px;
+  padding: 0 9px;
+  border-radius: 6px;
+  font: 600 11.5px system-ui;
+  background: var(--surface-2);
+  color: var(--text-2);
+}
+.g-chip.start {
+  background: var(--success-weak);
+  color: var(--success);
+}
+.g-chip.end {
+  background: var(--accent-weak);
+  color: var(--accent);
+}
+.g-arrow {
+  color: var(--text-3);
+  font-size: 11px;
+}
+.g-walk-check {
+  flex: none;
+  margin-left: auto;
+  font: 700 10px system-ui;
+  color: var(--success);
+}

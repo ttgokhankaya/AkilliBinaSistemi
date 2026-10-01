@@ -1,0 +1,170 @@
+/* Areas page — ported from "ADLE Areas.dc.html". Page-specific styles only;
+   everything reusable comes from ui.css / theme.css. Two cards (spatial layout
+   scatter, all-areas table) plus a create/edit form modal and delete confirm. */
+
+/* Header row: title block on the left, "New area" action on the right. */
+.ar-head-row {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 20px;
+  flex-wrap: wrap;
+}
+
+/* Card scaffold shared by the layout + table sections (matches ui-card shape
+   but with a header strip and rounded 15px corners like the mockup). */
+.ar-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 15px;
+  box-shadow: var(--shadow);
+  overflow: hidden;
+  margin-bottom: 18px;
+}
+.ar-card-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 14px 18px;
+  border-bottom: 1px solid var(--border);
+  flex-wrap: wrap;
+}
+.ar-card-title {
+  font: 700 13.5px system-ui;
+}
+
+/* Chart body — themed Plotly scatter of width × height, coloured by type. */
+.ar-chart-body {
+  position: relative;
+  height: 380px;
+  padding: 8px 10px;
+}
+
+/* Empty / loading state that fills the chart body. */
+.ar-chart-state {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  padding: 24px;
+}
+
+/* Table lives edge-to-edge inside the card; scroll horizontally on narrow. */
+.ar-table-scroll {
+  overflow-x: auto;
+}
+.ar-table {
+  width: 100%;
+  border-collapse: collapse;
+  min-width: 640px;
+  font-size: 13.5px;
+}
+.ar-table thead tr {
+  background: var(--surface-2);
+}
+.ar-table th {
+  text-align: left;
+  padding: 11px 18px;
+  font: 700 11px ui-monospace, Consolas, monospace;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: var(--text-3);
+  border-bottom: 1px solid var(--border);
+}
+.ar-table th.right {
+  text-align: right;
+}
+.ar-table td {
+  padding: 12px 18px;
+  border-bottom: 1px solid var(--border);
+  color: var(--text);
+}
+.ar-table tbody tr {
+  transition: background 0.1s;
+}
+.ar-table tbody tr.hover {
+  background: var(--surface-2);
+}
+.ar-name {
+  font-weight: 600;
+}
+.ar-name.child {
+  display: inline-block;
+  padding-left: 16px;
+  border-left: 2px solid var(--border-strong);
+  margin-left: 2px;
+}
+.ar-size {
+  font-family: ui-monospace, Consolas, monospace;
+  font-size: 12.5px;
+  color: var(--text-2);
+}
+.ar-parent {
+  color: var(--text-2);
+}
+.ar-actions {
+  padding: 8px 18px;
+  text-align: right;
+  white-space: nowrap;
+}
+.ar-actions .ui-icon-btn + .ui-icon-btn {
+  margin-left: 6px;
+}
+
+/* Type pill — colour comes from the per-type palette (inline style). */
+.ar-pill {
+  display: inline-flex;
+  align-items: center;
+  height: 24px;
+  padding: 0 10px;
+  border-radius: 20px;
+  font: 700 11.5px system-ui;
+}
+
+/* Empty table body row. */
+.ar-empty-cell {
+  padding: 0;
+}
+
+/* Create / edit form modal — wider than the confirm ui-modal (460px) and with
+   its own header/body/footer sections. Reuses ui-modal-backdrop for the scrim. */
+.ar-form-modal {
+  width: 100%;
+  max-width: 460px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  box-shadow: var(--shadow-lg);
+  animation: adle-pop 0.16s ease-out;
+  overflow: hidden;
+}
+.ar-modal-header {
+  padding: 18px 22px;
+  border-bottom: 1px solid var(--border);
+  font: 800 16px system-ui;
+}
+.ar-modal-body {
+  padding: 22px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+.ar-modal-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 14px;
+}
+.ar-modal-footer {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  padding: 16px 22px;
+  border-top: 1px solid var(--border);
+  background: var(--surface-2);
+}
+
+/* Inline error banner spacing when it sits above the table. */
+.ar-error-gap {
+  margin-bottom: 18px;
+}

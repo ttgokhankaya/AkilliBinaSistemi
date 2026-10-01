@@ -1,0 +1,255 @@
+/* Dashboard landing — ported from "ADLE Dashboard.dc.html". KPI row, "model
+   the home" rich cards, and "simulate & analyze" cards. Uses ui.css primitives. */
+
+.dash-kpis {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 16px;
+  margin-bottom: 26px;
+}
+.dash-kpi {
+  display: block;
+  width: 100%;
+  text-align: left;
+  padding: 18px 20px;
+  cursor: pointer;
+  transition: transform 0.12s, box-shadow 0.12s;
+}
+.dash-kpi:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-lg);
+}
+.dash-kpi-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.dash-kpi-icon {
+  width: 34px;
+  height: 34px;
+  border-radius: 10px;
+  background: var(--accent-weak);
+  color: var(--accent);
+  display: grid;
+  place-items: center;
+}
+.dash-kpi-val {
+  font: 800 34px/1 system-ui;
+  letter-spacing: -0.02em;
+  margin-top: 16px;
+}
+.dash-kpi-label {
+  font: 600 13px system-ui;
+  color: var(--text);
+  margin-top: 4px;
+}
+.dash-kpi-sub {
+  font: 500 12px system-ui;
+  color: var(--text-3);
+  margin-top: 2px;
+}
+
+.dash-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 16px;
+  margin-bottom: 28px;
+}
+
+.dash-mcard {
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+.dash-mcard-head {
+  padding: 16px 18px 12px;
+}
+.dash-mcard-titlerow {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  margin-bottom: 4px;
+}
+.dash-mcard-ico {
+  width: 26px;
+  height: 26px;
+  border-radius: 8px;
+  display: grid;
+  place-items: center;
+}
+.dash-mcard-title {
+  font: 700 14px system-ui;
+}
+.dash-mcard-sub {
+  font: 500 12.5px system-ui;
+  color: var(--text-2);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+.dash-mcard-sub .dot {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+}
+.dash-mcard-sub .dot span {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+}
+.dash-mcard-body {
+  padding: 0 18px 14px;
+  flex: 1;
+}
+.dash-mcard-foot {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  padding: 12px 18px;
+  border: none;
+  border-top: 1px solid var(--border);
+  background: none;
+  font: 600 12.5px system-ui;
+  color: var(--accent);
+  cursor: pointer;
+}
+.dash-mcard-foot:hover {
+  background: var(--surface-2);
+}
+
+.dash-rooms {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 7px;
+}
+.dash-room {
+  font: 600 11.5px system-ui;
+  padding: 5px 10px;
+  border-radius: 20px;
+}
+
+.dash-kinds {
+  display: flex;
+  flex-direction: column;
+  gap: 9px;
+}
+.dash-kind-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.dash-kind-name {
+  flex: none;
+  width: 120px;
+  font: 600 11.5px system-ui;
+  color: var(--text-2);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.dash-kind-track {
+  flex: 1;
+  height: 7px;
+  border-radius: 4px;
+  background: var(--surface-2);
+  overflow: hidden;
+}
+.dash-kind-bar {
+  height: 100%;
+  border-radius: 4px;
+  background: var(--accent);
+}
+.dash-kind-count {
+  flex: none;
+  font: 600 11px ui-monospace, Consolas, monospace;
+  color: var(--text-3);
+}
+
+.dash-timeline-wrap {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 12px;
+  padding-top: 2px;
+  min-height: 60px;
+}
+.dash-timeline {
+  position: relative;
+  height: 26px;
+}
+.dash-timeline-track {
+  position: absolute;
+  top: 11px;
+  left: 0;
+  right: 0;
+  height: 4px;
+  border-radius: 3px;
+  background: var(--surface-2);
+}
+.dash-timeline-seg {
+  position: absolute;
+  top: 7px;
+  height: 12px;
+  border-radius: 6px;
+}
+.dash-timeline-legend {
+  display: flex;
+  justify-content: space-between;
+  font: 600 10px ui-monospace, Consolas, monospace;
+  color: var(--text-3);
+}
+
+.dash-acard {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  text-align: left;
+  padding: 20px;
+  cursor: pointer;
+  transition: transform 0.12s, box-shadow 0.12s;
+}
+.dash-acard:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-lg);
+}
+.dash-acard-ico {
+  width: 38px;
+  height: 38px;
+  border-radius: 11px;
+  background: var(--accent-weak);
+  color: var(--accent);
+  display: grid;
+  place-items: center;
+  margin-bottom: 14px;
+}
+.dash-acard-title {
+  font: 800 16px system-ui;
+  letter-spacing: -0.01em;
+  margin-bottom: 5px;
+}
+.dash-acard-desc {
+  font: 400 13px/1.5 system-ui;
+  color: var(--text-2);
+  flex: 1;
+}
+.dash-acard-foot {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: 16px;
+  padding-top: 14px;
+  border-top: 1px solid var(--border);
+}
+.dash-acard-meta {
+  font: 600 11px ui-monospace, Consolas, monospace;
+  color: var(--text-3);
+}
+.dash-acard-open {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font: 700 12.5px system-ui;
+  color: var(--accent);
+}

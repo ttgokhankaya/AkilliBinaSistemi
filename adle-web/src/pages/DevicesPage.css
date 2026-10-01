@@ -1,0 +1,192 @@
+/* Devices page — ported from "ADLE Devices.dc.html". Reuses ui.css for the
+   table, pills, buttons, form fields, delete-confirm modal and toast; this file
+   only adds page-specific layout: header row, summary cards, kind rows, the
+   wider create/edit modal, and the tri-state segmented control. */
+
+/* Header: title block + "New device" action, right-aligned */
+.dv-head {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 20px;
+  flex-wrap: wrap;
+  margin-bottom: 20px;
+}
+
+/* Summary cards */
+.dv-summary {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: 14px;
+  margin-bottom: 18px;
+}
+.dv-stat {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 13px;
+  padding: 15px 18px;
+  box-shadow: var(--shadow);
+}
+.dv-stat-label {
+  font: 700 10.5px ui-monospace, Consolas, monospace;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--text-3);
+}
+.dv-stat-num {
+  font: 800 26px system-ui;
+  margin-top: 3px;
+}
+.dv-stat-num.on {
+  color: var(--success);
+}
+.dv-stat-num.off {
+  color: var(--text-2);
+}
+
+/* Kind breakdown card */
+.dv-kinds {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  justify-content: center;
+  padding: 13px 16px;
+}
+.dv-kind-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.dv-kind-icon {
+  display: inline-flex;
+  color: var(--text-3);
+}
+.dv-kind-name {
+  font: 600 11.5px system-ui;
+  color: var(--text-2);
+  flex: 1;
+}
+.dv-kind-count {
+  font: 700 11px ui-monospace, Consolas, monospace;
+  color: var(--text-3);
+}
+
+/* Table card head */
+.dv-card-head {
+  padding: 14px 18px;
+  border-bottom: 1px solid var(--border);
+  font: 700 13.5px system-ui;
+}
+.dv-table-wrap {
+  border: none;
+  border-radius: 0;
+}
+.dv-table-wrap .ui-table {
+  min-width: 720px;
+}
+.dv-kind-cell {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
+/* Tri-state pill (state === null) — ui-pill.on/.off cover the other two */
+.dv-pill-na {
+  background: transparent;
+  color: var(--text-3);
+  border: 1px dashed var(--border-strong);
+}
+
+.dv-action-error {
+  margin-bottom: 16px;
+}
+.dv-empty {
+  padding: 40px 24px;
+}
+
+/* Skeleton (first load) */
+.dv-skel-card {
+  padding: 8px 0;
+}
+.dv-skel-row {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 16px 18px;
+  border-bottom: 1px solid var(--border);
+}
+.dv-skel-row:last-child {
+  border-bottom: none;
+}
+
+/* Create / edit modal — wider than the shared .ui-modal (460px, per mockup),
+   with a titled header, a footer bar, and its own scroll body. */
+.dv-modal {
+  width: 100%;
+  max-width: 460px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  box-shadow: var(--shadow-lg);
+  animation: adle-pop 0.16s ease-out;
+  overflow: hidden;
+}
+.dv-modal-head {
+  padding: 18px 22px;
+  border-bottom: 1px solid var(--border);
+  font: 800 16px system-ui;
+}
+.dv-modal-body {
+  padding: 22px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+.dv-modal-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 14px;
+}
+.dv-modal-foot {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  padding: 16px 22px;
+  border-top: 1px solid var(--border);
+  background: var(--surface-2);
+}
+
+/* Tri-state segmented control */
+.dv-seg {
+  display: flex;
+  gap: 6px;
+  padding: 4px;
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  border-radius: 9px;
+}
+.dv-seg-btn {
+  flex: 1;
+  height: 32px;
+  border-radius: 7px;
+  border: none;
+  cursor: pointer;
+  font: 700 12px system-ui;
+  background: transparent;
+  color: var(--text-2);
+  transition: background 0.12s, color 0.12s;
+}
+.dv-seg-btn:hover {
+  color: var(--text);
+}
+.dv-seg-btn.active {
+  background: var(--surface);
+  color: var(--text);
+  box-shadow: var(--shadow);
+}
+
+@media (max-width: 480px) {
+  .dv-modal-grid {
+    grid-template-columns: 1fr;
+  }
+}
